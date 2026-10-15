@@ -15,20 +15,23 @@ export const site = {
   hostName: 'Saqib',
   hostLegalName: 'Muhammad Saqib',
 
-  /** [CONFIG] contactEmail */
-  contactEmail: 'saqib@epoxygrowthguy.com',
+  /** [CONFIG] contactEmail. Shown in the footer and on the privacy page. */
+  contactEmail: 'muhammad.saqib@autosinq.com',
 
   /**
-   * Transactional email. The `from` address has to sit on the domain that is
-   * onboarded to Cloudflare Email Sending, so keep it on epoxygrowthguy.com.
+   * Transactional email.
+   *
+   * The `from` address has to sit on a domain onboarded to Cloudflare Email
+   * Sending. That is autosinq.com here, so autosinq.com is the domain to
+   * onboard, not epoxygrowthguy.com.
    *
    * Where the heads up lands is set with the NOTIFY_EMAIL variable in
    * Cloudflare, so a personal inbox never has to live in this repo. Without
-   * it, the notification goes to contactEmail.
+   * it, the notification falls back to contactEmail, which is read anyway.
    */
   mail: {
-    from: 'requests@epoxygrowthguy.com',
-    fromName: 'Epoxy Growth Sessions',
+    from: 'muhammad.saqib@autosinq.com',
+    fromName: 'Muhammad Saqib',
   },
 
   /** Instagram handle, without the @. */

@@ -118,12 +118,14 @@ entirely in `src/lib/store.ts`.
    | `NOTIFY_EMAIL` | secret | where the heads up lands, keeps a personal inbox out of the repo |
    | `STORE_TARGET` | plain | `supabase` or `airtable` |
 
-4. Turn on email sending for the domain, once:
+4. Turn on email sending, once. The domain is **autosinq.com**, because that is
+   where the from address lives:
    ```bash
-   npx wrangler email sending enable epoxygrowthguy.com
+   npx wrangler email sending enable autosinq.com
    ```
-   This adds the SPF and DKIM records. Nothing sends until it is done. Full
-   detail in `docs/emails.md`.
+   **Read `docs/emails.md` first.** autosinq.com already sends mail, and a
+   second SPF record alongside the existing one would break it. Nothing sends
+   until this is done.
 5. Add `epoxygrowthguy.com` as a custom domain, and `www.epoxygrowthguy.com`
    too. HTTPS is forced by Cloudflare.
 6. Send `www` to the apex with a Redirect Rule on the zone

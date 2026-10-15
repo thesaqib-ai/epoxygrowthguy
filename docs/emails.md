@@ -10,8 +10,9 @@ screen. Failures land in the Pages Function logs.
 
 ## 1. Heads up to Saqib
 
-- **To:** `NOTIFY_EMAIL`, or the contact address in `src/config.ts` if that
-  variable is not set
+- **To:** `NOTIFY_EMAIL`, which is set in Cloudflare rather than committed here.
+  If it is missing, this falls back to the contact address in `src/config.ts`,
+  which is also read, so a forgotten variable never loses a request.
 - **Reply-To:** the person who sent the request, so hitting reply on your phone
   answers them directly instead of emailing yourself
 - **Subject:** `Interview request: Jane Doe, Doe Coatings`
@@ -47,44 +48,68 @@ out of spam folders.
 
 ## Setup
 
-One command, once, before the first send:
+The `from` address is `muhammad.saqib@autosinq.com`, set in `src/config.ts`.
+So the domain to onboard is **autosinq.com**, not epoxygrowthguy.com. The
+sending domain follows the from address, not the website.
+
+### Read this before onboarding
+
+autosinq.com already sends email. That makes this different from onboarding a
+fresh domain, and getting it wrong damages mail you already rely on.
+
+**A domain can only have one SPF record.** autosinq.com almost certainly has
+one already, put there by whoever hosts the mailbox. If a second SPF TXT record
+appears alongside it, the standard says both are invalid, and every email
+autosinq.com sends starts failing SPF. Quotes and invoices land in spam, not
+just these two emails.
+
+So do not blindly accept an added record. Do this instead:
 
 ```bash
-npx wrangler email sending enable epoxygrowthguy.com
+npx wrangler email sending enable autosinq.com
+npx wrangler email sending dns get autosinq.com
 ```
 
-That adds the SPF and DKIM records to the zone. They usually take five to
-fifteen minutes. Check them with:
+Then open the DNS tab for autosinq.com and check the TXT records:
+
+- **If there is now one SPF record,** nothing to do.
+- **If there are two,** merge them. Take the `include:` value that Cloudflare
+  added, paste it into the SPF record that was already there, and delete the
+  one Cloudflare created. One record, both includes, for example
+  `v=spf1 include:_spf.google.com include:<whatever Cloudflare listed> ~all`.
+  Use the exact value from `dns get`, do not type it from memory.
+
+DKIM is safe either way. It uses its own selector subdomain, so the new record
+cannot collide with an existing one.
+
+If autosinq.com has a DMARC record set to `quarantine` or `reject`, wait for
+DNS to settle before the form goes live. Send a test to yourself first. A guest
+whose confirmation lands in spam is a guest who thinks you ignored them.
+
+### Verifying
 
 ```bash
-npx wrangler email sending dns get epoxygrowthguy.com
+npx wrangler email sending dns get autosinq.com
 ```
 
-The `from` address is `requests@epoxygrowthguy.com`, set in `src/config.ts`.
-It has to stay on the onboarded domain. Sending from gmail.com or any domain
-you do not control is rejected, which is the whole point of DKIM.
+Sending from a domain you have not onboarded is rejected with
+`E_SENDER_NOT_VERIFIED`, which is the whole point of DKIM.
 
-### Receiving replies at that address
+### Receiving
 
-Sending and receiving are separate. If you want mail sent to
-`requests@epoxygrowthguy.com` or the contact address to reach an inbox you
-actually read, turn on Email Routing for the domain and forward it:
-
-```bash
-npx wrangler email routing enable epoxygrowthguy.com
-npx wrangler email routing addresses create you@gmail.com
-```
-
-Then add a rule pointing the address at your verified destination. Until you
-do that, replies to the contact address go nowhere.
+Nothing to set up. `muhammad.saqib@autosinq.com` is already a real mailbox, so
+replies to the auto reply and anything sent to the address in the footer land
+where you already read mail.
 
 ## Testing before launch
 
-`wrangler pages dev` does not send real mail unless the binding is marked
-remote. To send genuinely, temporarily add `remote = true` under
-`[[send_email]]` in `wrangler.toml`, submit the form at
-`http://127.0.0.1:8788`, and use addresses you control. Take it out again
-before deploying.
+`wrangler pages dev` does not send real mail. It writes each message to
+`.wrangler/tmp/email/` instead, which is useful for reading exactly what would
+have gone out.
+
+To send for real, temporarily add `remote = true` under `[[send_email]]` in
+`wrangler.toml`, submit the form at `http://127.0.0.1:8788` using addresses you
+control, then take it out again before deploying.
 
 Bounces from made up addresses count against your sender reputation, so do not
 test with `test@test.com`.

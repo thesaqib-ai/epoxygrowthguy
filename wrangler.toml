@@ -14,10 +14,14 @@ id = "replace-with-your-kv-namespace-id"
 preview_id = "replace-with-your-preview-kv-namespace-id"
 
 # Transactional email, sent straight from the Pages Function.
-# The domain has to be onboarded first:
-#   npx wrangler email sending enable epoxygrowthguy.com
+# The sending domain is autosinq.com, not epoxygrowthguy.com, because that is
+# where the from address lives. Onboard it first:
+#   npx wrangler email sending enable autosinq.com
+# Read docs/emails.md before running that, autosinq.com already sends mail and
+# a second SPF record would break it.
 [[send_email]]
 name = "EMAIL"
+allowed_sender_addresses = ["muhammad.saqib@autosinq.com"]
 
 [vars]
 # "supabase" (default) or "airtable". See src/lib/store.ts.
