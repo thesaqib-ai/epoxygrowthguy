@@ -1,0 +1,89 @@
+---
+import Base from '../layouts/Base.astro';
+import TopBar from '../components/TopBar.astro';
+import Footer from '../components/Footer.astro';
+import { site } from '../config';
+
+const title = `Privacy | ${site.wordmark}`;
+const description =
+  'What the interview request form collects, why, where it is stored and how to ask for deletion.';
+---
+
+<Base title={title} description={description} canonicalPath="/privacy">
+  <TopBar />
+  <main id="main" class="wrap py-16 sm:py-24">
+    <div class="max-w-2xl">
+      <div class="rule"></div>
+      <h1 class="mt-5 text-3xl sm:text-4xl">Privacy</h1>
+      <p class="mt-4 text-base leading-relaxed text-muted">
+        Plain language, no small print. Last updated October 2026.
+      </p>
+
+      <div class="mt-10 space-y-8">
+        <section>
+          <h2 class="text-xl normal-case tracking-normal sm:text-2xl">
+            What is collected
+          </h2>
+          <p class="mt-3 text-base leading-relaxed text-muted">
+            Only what you type into the interview request form: your name,
+            business name, Instagram handle, website, email, phone number if you
+            add one, your location, years in business, what you do, team size,
+            what you would like to talk about, your biggest challenge if you
+            share it, and how you heard about the series. The form also records
+            the page that sent you here and any campaign tags in the web
+            address, so I know which posts bring people in.
+          </p>
+        </section>
+
+        <section>
+          <h2 class="text-xl normal-case tracking-normal sm:text-2xl">Why</h2>
+          <p class="mt-3 text-base leading-relaxed text-muted">
+            To review interview requests and to contact you about them. Nothing
+            else.
+          </p>
+        </section>
+
+        <section>
+          <h2 class="text-xl normal-case tracking-normal sm:text-2xl">
+            Where it is stored
+          </h2>
+          <p class="mt-3 text-base leading-relaxed text-muted">
+            In a private Supabase database that only I can read, and it passes
+            through n8n, which sends me the notification and sends you the
+            confirmation email. Cloudflare Turnstile checks that the form was
+            sent by a person and not a bot. Page visits are counted with
+            Cloudflare Web Analytics, which uses no cookies and does not track
+            you across sites.
+          </p>
+        </section>
+
+        <section>
+          <h2 class="text-xl normal-case tracking-normal sm:text-2xl">
+            What is never done
+          </h2>
+          <p class="mt-3 text-base leading-relaxed text-muted">
+            Nothing is sold, and nothing is shared with anyone else for their
+            marketing.
+          </p>
+        </section>
+
+        <section>
+          <h2 class="text-xl normal-case tracking-normal sm:text-2xl">
+            Deleting your details
+          </h2>
+          <p class="mt-3 text-base leading-relaxed text-muted">
+            Email
+            <a
+              href={`mailto:${site.contactEmail}`}
+              class="text-gold-400 underline decoration-gold-400/30 underline-offset-4 hover:decoration-gold-400"
+              >{site.contactEmail}</a
+            > and ask me to delete your request. I will remove it and confirm.
+          </p>
+        </section>
+      </div>
+
+      <a href="/" class="btn btn-ghost mt-12">Back to the series</a>
+    </div>
+  </main>
+  <Footer />
+</Base>

@@ -1,0 +1,54 @@
+---
+import Section from './Section.astro';
+
+const items = [
+  {
+    title: 'Your story, edited properly.',
+    body: 'One relaxed call turns into several short reels.',
+    // Scissors style edit icon.
+    icon: 'M4 7h10m-10 5h16M4 17h10M18 5.5v3M18 15.5v3',
+  },
+  {
+    title: 'Posted on both profiles.',
+    body: 'Every reel goes out as an Instagram collab, so it reaches your audience and mine.',
+    icon: 'M7 10a3 3 0 1 0 0-6 3 3 0 0 0 0 6Zm10 0a3 3 0 1 0 0-6 3 3 0 0 0 0 6ZM2 20v-1a5 5 0 0 1 5-5h0a5 5 0 0 1 5 5v1m0-6a5 5 0 0 1 5-5h0a5 5 0 0 1 5 5v1',
+  },
+  {
+    title: 'About 15 minutes of your time.',
+    body: 'I handle the questions, editing and posting.',
+    icon: 'M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18Zm0-13v5l3.5 2',
+  },
+];
+---
+
+<Section heading="Why guests come on">
+  <ul class="grid gap-6 sm:grid-cols-3 sm:gap-8">
+    {
+      items.map((item, i) => (
+        <li class="reveal" style={`--reveal-delay: ${i * 60}ms`}>
+          <span
+            class="flex h-10 w-10 items-center justify-center rounded-xl border border-gold-400/25 bg-gold-400/10"
+            aria-hidden="true"
+          >
+            <svg
+              viewBox="0 0 24 24"
+              class="h-5 w-5 stroke-gold-400"
+              fill="none"
+              stroke-width="1.6"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <path d={item.icon} />
+            </svg>
+          </span>
+          <h3 class="mt-4 text-base normal-case tracking-normal sm:text-lg">
+            {item.title}
+          </h3>
+          <p class="mt-2 text-sm leading-relaxed text-muted sm:text-base">
+            {item.body}
+          </p>
+        </li>
+      ))
+    }
+  </ul>
+</Section>

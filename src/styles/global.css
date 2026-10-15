@@ -1,0 +1,239 @@
+@import 'tailwindcss';
+
+/* Self hosted fonts, so there is no third party request on first paint. */
+@import '@fontsource-variable/inter/wght.css';
+@import '@fontsource/anton/400.css';
+
+@theme {
+  /* Base surface, near black. */
+  --color-ink-950: #0b0b0c;
+  --color-ink-900: #101012;
+  --color-ink-850: #151518;
+  --color-ink-800: #1b1b1f;
+  --color-ink-700: #2a2a30;
+  --color-ink-600: #3a3a42;
+
+  /* Text. */
+  --color-paper: #f6f4f0;
+  --color-muted: #a9a6a0;
+  /* Light enough to clear 4.5:1 against the near black base. */
+  --color-faint: #8a8780;
+
+  /* Warm metallic gold accent, used sparingly. */
+  --color-gold-300: #e8c97e;
+  --color-gold-400: #d4a84b;
+  --color-gold-500: #b88c33;
+
+  --font-display: 'Anton', 'Arial Narrow', system-ui, sans-serif;
+  --font-sans:
+    'Inter Variable', 'Inter', ui-sans-serif, system-ui, -apple-system,
+    'Segoe UI', Roboto, sans-serif;
+
+  --ease-out-soft: cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@layer base {
+  :root {
+    color-scheme: dark;
+    --reveal-distance: 16px;
+  }
+
+  html {
+    scroll-behavior: smooth;
+    /* Sticky top bar should not cover anchor targets. */
+    scroll-padding-top: 5.5rem;
+    -webkit-text-size-adjust: 100%;
+  }
+
+  body {
+    background-color: var(--color-ink-950);
+    color: var(--color-paper);
+    font-family: var(--font-sans);
+    font-synthesis-weight: none;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+    overflow-x: hidden;
+  }
+
+  h1,
+  h2,
+  h3,
+  .font-display {
+    font-family: var(--font-display);
+    font-weight: 400;
+    letter-spacing: 0.01em;
+    text-transform: uppercase;
+    line-height: 0.95;
+  }
+
+  ::selection {
+    background-color: var(--color-gold-400);
+    color: var(--color-ink-950);
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--color-gold-300);
+    outline-offset: 3px;
+    border-radius: 2px;
+  }
+
+  /* Remove the default tap highlight but keep a visible focus ring. */
+  a,
+  button {
+    -webkit-tap-highlight-color: transparent;
+  }
+}
+
+@layer components {
+  .wrap {
+    width: 100%;
+    max-width: 72rem;
+    margin-inline: auto;
+    padding-inline: 1.25rem;
+  }
+
+  @media (min-width: 768px) {
+    .wrap {
+      padding-inline: 2rem;
+    }
+  }
+
+  .eyebrow {
+    font-family: var(--font-sans);
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--color-gold-400);
+  }
+
+  /* Buttons */
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    border-radius: 9999px;
+    padding: 0.875rem 1.5rem;
+    font-size: 0.9375rem;
+    font-weight: 600;
+    line-height: 1;
+    text-decoration: none;
+    white-space: nowrap;
+    cursor: pointer;
+    transition:
+      transform 150ms var(--ease-out-soft),
+      background-color 150ms ease,
+      border-color 150ms ease,
+      color 150ms ease,
+      box-shadow 150ms ease;
+  }
+
+  .btn:hover {
+    transform: translateY(-1px);
+  }
+
+  .btn:active {
+    transform: scale(0.98);
+  }
+
+  .btn-primary {
+    background-color: var(--color-gold-400);
+    color: var(--color-ink-950);
+    box-shadow: 0 1px 0 0 rgb(255 255 255 / 0.25) inset;
+  }
+
+  .btn-primary:hover {
+    background-color: var(--color-gold-300);
+  }
+
+  .btn-ghost {
+    border: 1px solid var(--color-ink-700);
+    background-color: rgb(255 255 255 / 0.02);
+    color: var(--color-paper);
+  }
+
+  .btn-ghost:hover {
+    border-color: var(--color-ink-600);
+    background-color: rgb(255 255 255 / 0.05);
+  }
+
+  .btn-sm {
+    padding: 0.625rem 1.125rem;
+    font-size: 0.8125rem;
+  }
+
+  /* A thin gold rule used to open sections. */
+  .rule {
+    height: 1px;
+    width: 2.5rem;
+    background: linear-gradient(
+      to right,
+      var(--color-gold-400),
+      transparent
+    );
+  }
+}
+
+@layer utilities {
+  /* Reveal on first view. Content is visible by default so the page still
+     reads with JavaScript off. */
+  .reveal {
+    opacity: 1;
+    transform: none;
+  }
+
+  html.js .reveal {
+    opacity: 0;
+    transform: translateY(var(--reveal-distance));
+    transition:
+      opacity 400ms var(--ease-out-soft),
+      transform 400ms var(--ease-out-soft);
+    transition-delay: var(--reveal-delay, 0ms);
+    will-change: opacity, transform;
+  }
+
+  html.js .reveal.is-visible {
+    opacity: 1;
+    transform: none;
+  }
+
+  /* The honeypot field. Hidden visually and from assistive tech, but it is a
+     real text input so bots fill it in. */
+  .honeypot {
+    position: absolute;
+    left: -9999px;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    opacity: 0;
+    pointer-events: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  html.js .reveal,
+  html.js .reveal.is-visible {
+    opacity: 1;
+    transform: none;
+    transition: none;
+  }
+
+  .btn:hover,
+  .btn:active {
+    transform: none;
+  }
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

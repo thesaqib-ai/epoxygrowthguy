@@ -1,0 +1,31 @@
+---
+import { site, instagramUrl } from '../config';
+
+const linkClass =
+  'text-sm text-muted transition-colors hover:text-gold-400 underline decoration-ink-700 underline-offset-4';
+---
+
+<footer class="border-t border-white/5 py-10">
+  <div
+    class="wrap flex flex-col gap-6 sm:flex-row sm:items-center sm:justify-between"
+  >
+    <div>
+      <p class="font-display text-lg tracking-wide text-paper">
+        {site.wordmark}
+      </p>
+      <p class="mt-2 text-xs text-faint">
+        &copy; {site.copyrightYear} {site.hostLegalName}
+      </p>
+    </div>
+
+    <nav class="flex flex-wrap items-center gap-x-6 gap-y-3">
+      <a href={instagramUrl} target="_blank" rel="noopener" class={linkClass}>
+        Instagram
+      </a>
+      <a href={`mailto:${site.contactEmail}`} class={linkClass}>
+        {site.contactEmail}
+      </a>
+      <a href="/privacy" class={linkClass}>Privacy</a>
+    </nav>
+  </div>
+</footer>

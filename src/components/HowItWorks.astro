@@ -1,0 +1,41 @@
+---
+import Section from './Section.astro';
+
+const steps = [
+  {
+    title: 'Request.',
+    body: 'Fill out the short form below.',
+  },
+  {
+    title: 'Chat.',
+    body: "If it's a fit, I'll send you a time. We record a relaxed 15 to 20 minute video call.",
+  },
+  {
+    title: 'Go live.',
+    body: 'I edit the reels, send them to you first, then we post them together.',
+  },
+];
+---
+
+<Section heading="How it works">
+  <ol class="grid gap-6 sm:grid-cols-3 sm:gap-8">
+    {
+      steps.map((step, i) => (
+        <li
+          class="reveal rounded-2xl border border-white/5 bg-ink-900/50 p-5 sm:p-6"
+          style={`--reveal-delay: ${i * 60}ms`}
+        >
+          <span class="font-display text-2xl text-gold-400">
+            {String(i + 1).padStart(2, '0')}
+          </span>
+          <h3 class="mt-3 text-base normal-case tracking-normal sm:text-lg">
+            {step.title}
+          </h3>
+          <p class="mt-2 text-sm leading-relaxed text-muted sm:text-base">
+            {step.body}
+          </p>
+        </li>
+      ))
+    }
+  </ol>
+</Section>

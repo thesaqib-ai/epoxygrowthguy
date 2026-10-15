@@ -1,0 +1,592 @@
+---
+import {
+  YEARS_IN_BUSINESS,
+  SERVICES,
+  TEAM_SIZES,
+  HEARD_FROM,
+  MAX_TEXTAREA,
+  HONEYPOT_FIELD,
+} from '../lib/form-schema';
+import { site, instagramUrl } from '../config';
+
+const turnstileSiteKey = import.meta.env.PUBLIC_TURNSTILE_SITE_KEY ?? '';
+
+const fieldClass =
+  'mt-2 w-full rounded-xl border border-ink-700 bg-ink-900 px-4 py-3 text-base text-paper placeholder:text-faint transition-colors focus:border-gold-400 focus:outline-none focus:ring-1 focus:ring-gold-400 aria-[invalid=true]:border-red-400/70';
+const labelClass = 'block text-sm font-medium text-paper';
+const errorClass = 'mt-1.5 hidden text-sm text-red-300';
+---
+
+<section id="request" class="wrap scroll-mt-20 py-16 sm:py-24">
+  <div class="reveal">
+    <div class="rule"></div>
+    <h2 class="mt-5 text-3xl sm:text-4xl lg:text-5xl">Request an interview</h2>
+    <p class="mt-4 max-w-xl text-base leading-relaxed text-muted sm:text-lg">
+      Tell me a little about you and your business. It takes about two minutes.
+    </p>
+  </div>
+
+  <div
+    class="reveal mt-10 rounded-3xl border border-white/5 bg-ink-900/40 p-5 sm:mt-12 sm:p-8"
+  >
+    <noscript>
+      <p class="text-base leading-relaxed text-muted">
+        This form needs JavaScript. Send me a DM on Instagram at
+        <a
+          href={instagramUrl}
+          class="text-gold-400 underline underline-offset-4"
+          >@{site.instagramHandle}</a
+        > and tell me about your business, or email
+        <a
+          href={`mailto:${site.contactEmail}`}
+          class="text-gold-400 underline underline-offset-4"
+          >{site.contactEmail}</a
+        >.
+      </p>
+    </noscript>
+
+    <!-- Success state. Replaces the form, no page reload. -->
+    <div id="form-success" class="hidden" role="status" aria-live="polite">
+      <div
+        class="flex h-12 w-12 items-center justify-center rounded-full bg-gold-400/15 ring-1 ring-gold-400/30"
+        aria-hidden="true"
+      >
+        <svg
+          viewBox="0 0 24 24"
+          class="h-6 w-6 stroke-gold-400"
+          fill="none"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        >
+          <path d="m5 13 4 4L19 7" />
+        </svg>
+      </div>
+      <h3 class="mt-5 text-2xl sm:text-3xl">Got it, thank you.</h3>
+      <p class="mt-3 max-w-xl text-base leading-relaxed text-muted">
+        I'll take a look and get back to you within 48 hours. Keep an eye on
+        your email and Instagram DMs.
+      </p>
+    </div>
+
+    <form
+      id="request-form"
+      method="post"
+      action="/api/request"
+      novalidate
+      class="hidden-when-no-js"
+    >
+      <div class="grid gap-5 sm:grid-cols-2 sm:gap-6">
+        <div>
+          <label class={labelClass} for="full_name">Full name</label>
+          <input
+            class={fieldClass}
+            id="full_name"
+            name="full_name"
+            type="text"
+            autocomplete="name"
+            required
+            aria-required="true"
+            aria-describedby="err-full_name"
+          />
+          <p class={errorClass} id="err-full_name" data-error-for="full_name">
+          </p>
+        </div>
+
+        <div>
+          <label class={labelClass} for="business_name">Business name</label>
+          <input
+            class={fieldClass}
+            id="business_name"
+            name="business_name"
+            type="text"
+            autocomplete="organization"
+            required
+            aria-required="true"
+            aria-describedby="err-business_name"
+          />
+          <p
+            class={errorClass}
+            id="err-business_name"
+            data-error-for="business_name"
+          >
+          </p>
+        </div>
+
+        <div>
+          <label class={labelClass} for="instagram">Instagram handle</label>
+          <div class="relative">
+            <span
+              class="pointer-events-none absolute left-4 top-1/2 mt-[1px] -translate-y-1/2 text-base text-faint"
+              aria-hidden="true">@</span
+            >
+            <input
+              class={`${fieldClass} pl-8`}
+              id="instagram"
+              name="instagram"
+              type="text"
+              inputmode="text"
+              autocapitalize="none"
+              spellcheck="false"
+              placeholder="yourhandle"
+              required
+              aria-required="true"
+              aria-describedby="err-instagram"
+            />
+          </div>
+          <p class={errorClass} id="err-instagram" data-error-for="instagram">
+          </p>
+        </div>
+
+        <div>
+          <label class={labelClass} for="website">
+            Website <span class="text-faint">(optional)</span>
+          </label>
+          <input
+            class={fieldClass}
+            id="website"
+            name="website"
+            type="url"
+            inputmode="url"
+            autocomplete="url"
+            placeholder="yoursite.com"
+            aria-describedby="err-website"
+          />
+          <p class={errorClass} id="err-website" data-error-for="website"></p>
+        </div>
+
+        <div>
+          <label class={labelClass} for="email">Email</label>
+          <input
+            class={fieldClass}
+            id="email"
+            name="email"
+            type="email"
+            inputmode="email"
+            autocomplete="email"
+            autocapitalize="none"
+            spellcheck="false"
+            required
+            aria-required="true"
+            aria-describedby="err-email"
+          />
+          <p class={errorClass} id="err-email" data-error-for="email"></p>
+        </div>
+
+        <div>
+          <label class={labelClass} for="phone">
+            Phone or WhatsApp <span class="text-faint">(optional)</span>
+          </label>
+          <input
+            class={fieldClass}
+            id="phone"
+            name="phone"
+            type="tel"
+            inputmode="tel"
+            autocomplete="tel"
+            aria-describedby="err-phone"
+          />
+          <p class={errorClass} id="err-phone" data-error-for="phone"></p>
+        </div>
+
+        <div class="sm:col-span-2">
+          <label class={labelClass} for="location">
+            City and state or country
+          </label>
+          <input
+            class={fieldClass}
+            id="location"
+            name="location"
+            type="text"
+            autocomplete="address-level2"
+            required
+            aria-required="true"
+            aria-describedby="err-location"
+          />
+          <p class={errorClass} id="err-location" data-error-for="location"></p>
+        </div>
+
+        <div>
+          <label class={labelClass} for="years_in_business">
+            Years in business
+          </label>
+          <select
+            class={fieldClass}
+            id="years_in_business"
+            name="years_in_business"
+            required
+            aria-required="true"
+            aria-describedby="err-years_in_business"
+          >
+            <option value="">Pick one</option>
+            {
+              YEARS_IN_BUSINESS.map((option) => (
+                <option value={option}>{option}</option>
+              ))
+            }
+          </select>
+          <p
+            class={errorClass}
+            id="err-years_in_business"
+            data-error-for="years_in_business"
+          >
+          </p>
+        </div>
+
+        <div>
+          <label class={labelClass} for="team_size">Team size</label>
+          <select
+            class={fieldClass}
+            id="team_size"
+            name="team_size"
+            required
+            aria-required="true"
+            aria-describedby="err-team_size"
+          >
+            <option value="">Pick one</option>
+            {TEAM_SIZES.map((option) => <option value={option}>{option}</option>)}
+          </select>
+          <p class={errorClass} id="err-team_size" data-error-for="team_size">
+          </p>
+        </div>
+
+        <fieldset class="sm:col-span-2">
+          <legend class={labelClass}>What do you do?</legend>
+          <div class="mt-3 flex flex-wrap gap-2" aria-describedby="err-services">
+            {
+              SERVICES.map((option, i) => (
+                <label
+                  class="cursor-pointer select-none rounded-full border border-ink-700 bg-ink-900 px-4 py-2 text-sm text-muted transition-colors hover:border-ink-600 has-checked:border-gold-400 has-checked:bg-gold-400 has-checked:text-ink-950 has-checked:font-semibold has-focus-visible:outline has-focus-visible:outline-2 has-focus-visible:outline-offset-2 has-focus-visible:outline-gold-300"
+                  for={`service-${i}`}
+                >
+                  <input
+                    class="sr-only"
+                    type="checkbox"
+                    id={`service-${i}`}
+                    name="services"
+                    value={option}
+                  />
+                  {option}
+                </label>
+              ))
+            }
+          </div>
+          <p class={errorClass} id="err-services" data-error-for="services"></p>
+        </fieldset>
+
+        <div class="sm:col-span-2">
+          <label class={labelClass} for="talk_about">
+            What would you love to talk about?
+          </label>
+          <textarea
+            class={`${fieldClass} min-h-28 resize-y`}
+            id="talk_about"
+            name="talk_about"
+            rows="4"
+            maxlength={MAX_TEXTAREA}
+            required
+            aria-required="true"
+            aria-describedby="err-talk_about count-talk_about"></textarea>
+          <div class="mt-1.5 flex items-start justify-between gap-4">
+            <p
+              class="hidden text-sm text-red-300"
+              id="err-talk_about"
+              data-error-for="talk_about"
+            >
+            </p>
+            <p
+              class="ml-auto shrink-0 text-xs text-faint"
+              id="count-talk_about"
+              data-count-for="talk_about"
+            >
+              0 / {MAX_TEXTAREA}
+            </p>
+          </div>
+        </div>
+
+        <div class="sm:col-span-2">
+          <label class={labelClass} for="biggest_challenge">
+            What's the biggest challenge in your business right now?
+            <span class="text-faint">(optional)</span>
+          </label>
+          <textarea
+            class={`${fieldClass} min-h-28 resize-y`}
+            id="biggest_challenge"
+            name="biggest_challenge"
+            rows="4"
+            maxlength={MAX_TEXTAREA}
+            aria-describedby="err-biggest_challenge count-biggest_challenge"
+          ></textarea>
+          <div class="mt-1.5 flex items-start justify-between gap-4">
+            <p
+              class="hidden text-sm text-red-300"
+              id="err-biggest_challenge"
+              data-error-for="biggest_challenge"
+            >
+            </p>
+            <p
+              class="ml-auto shrink-0 text-xs text-faint"
+              id="count-biggest_challenge"
+              data-count-for="biggest_challenge"
+            >
+              0 / {MAX_TEXTAREA}
+            </p>
+          </div>
+        </div>
+
+        <div class="sm:col-span-2">
+          <label class={labelClass} for="heard_from">
+            How did you hear about the series?
+            <span class="text-faint">(optional)</span>
+          </label>
+          <select
+            class={fieldClass}
+            id="heard_from"
+            name="heard_from"
+            aria-describedby="err-heard_from"
+          >
+            <option value="">Pick one</option>
+            {HEARD_FROM.map((option) => <option value={option}>{option}</option>)}
+          </select>
+          <p class={errorClass} id="err-heard_from" data-error-for="heard_from">
+          </p>
+        </div>
+      </div>
+
+      <!-- Honeypot. A real text input hidden with CSS, never type="hidden". -->
+      <div class="honeypot" aria-hidden="true">
+        <label for={HONEYPOT_FIELD}>Company website</label>
+        <input
+          type="text"
+          id={HONEYPOT_FIELD}
+          name={HONEYPOT_FIELD}
+          tabindex="-1"
+          autocomplete="off"
+        />
+      </div>
+
+      <input type="hidden" name="utm_source" />
+      <input type="hidden" name="utm_medium" />
+      <input type="hidden" name="utm_campaign" />
+      <input type="hidden" name="referrer" />
+
+      {
+        turnstileSiteKey && (
+          <div class="mt-7">
+            <div
+              class="cf-turnstile"
+              data-sitekey={turnstileSiteKey}
+              data-theme="dark"
+              data-appearance="interaction-only"
+              data-size="flexible"
+            />
+          </div>
+        )
+      }
+
+      <!-- Form level error state. -->
+      <p
+        id="form-error"
+        class="mt-7 hidden rounded-xl border border-red-400/30 bg-red-400/10 px-4 py-3 text-sm leading-relaxed text-red-200"
+        role="alert"
+      >
+      </p>
+
+      <div class="mt-7 flex flex-wrap items-center gap-4">
+        <button type="submit" class="btn btn-primary" id="submit-btn">
+          <span data-submit-label>Send my request</span>
+        </button>
+        <p class="text-sm text-faint">
+          I review every request personally and reply within 48 hours.
+        </p>
+      </div>
+    </form>
+  </div>
+</section>
+
+<style>
+  /* With JavaScript off the form cannot submit, so the noscript message
+     stands in for it. */
+  html:not(.js) .hidden-when-no-js {
+    display: none;
+  }
+</style>
+
+{
+  turnstileSiteKey && (
+    <script
+      is:inline
+      src="https://challenges.cloudflare.com/turnstile/v0/api.js"
+      async
+      defer
+    />
+  )
+}
+
+<script>
+  import {
+    validateRequest,
+    HONEYPOT_FIELD,
+    MAX_TEXTAREA,
+  } from '../lib/form-schema';
+
+  const form = document.getElementById('request-form') as HTMLFormElement | null;
+  const success = document.getElementById('form-success');
+  const formError = document.getElementById('form-error');
+  const submitBtn = document.getElementById(
+    'submit-btn',
+  ) as HTMLButtonElement | null;
+
+  const GENERIC_ERROR =
+    'Something went wrong sending that. Please try again, or DM me on Instagram at @epoxy_growth_guy.';
+
+  if (form && success && formError && submitBtn) {
+    const label = submitBtn.querySelector('[data-submit-label]');
+
+    // Carry campaign details through with the request.
+    const params = new URLSearchParams(window.location.search);
+    for (const key of ['utm_source', 'utm_medium', 'utm_campaign'] as const) {
+      const input = form.elements.namedItem(key) as HTMLInputElement | null;
+      if (input) input.value = params.get(key) ?? '';
+    }
+    const referrer = form.elements.namedItem('referrer') as HTMLInputElement | null;
+    if (referrer) referrer.value = document.referrer || '';
+
+    // Live character counts on the two long answers.
+    form.querySelectorAll<HTMLElement>('[data-count-for]').forEach((counter) => {
+      const name = counter.dataset.countFor!;
+      const field = form.elements.namedItem(name) as HTMLTextAreaElement | null;
+      if (!field) return;
+      const update = () => {
+        counter.textContent = `${field.value.length} / ${MAX_TEXTAREA}`;
+      };
+      field.addEventListener('input', update);
+      update();
+    });
+
+    const readForm = () => {
+      const fd = new FormData(form);
+      const raw: Record<string, unknown> = {};
+      for (const [key, value] of fd.entries()) {
+        if (key === 'services' || key === HONEYPOT_FIELD) continue;
+        raw[key] = typeof value === 'string' ? value : '';
+      }
+      raw.services = fd.getAll('services').filter((v) => typeof v === 'string');
+      return raw;
+    };
+
+    const clearError = (name: string) => {
+      const slot = form.querySelector<HTMLElement>(`[data-error-for="${name}"]`);
+      if (slot) {
+        slot.textContent = '';
+        slot.classList.add('hidden');
+      }
+      const field = form.elements.namedItem(name);
+      if (field instanceof HTMLElement) field.removeAttribute('aria-invalid');
+    };
+
+    const showErrors = (errors: Record<string, string | undefined>) => {
+      const invalid: HTMLElement[] = [];
+      form.querySelectorAll<HTMLElement>('[data-error-for]').forEach((slot) => {
+        const name = slot.dataset.errorFor!;
+        const message = errors[name];
+        if (message) {
+          slot.textContent = message;
+          slot.classList.remove('hidden');
+          const field = form.elements.namedItem(name);
+          const el =
+            field instanceof RadioNodeList
+              ? (field[0] as HTMLElement)
+              : (field as HTMLElement | null);
+          if (el) {
+            el.setAttribute('aria-invalid', 'true');
+            invalid.push(el);
+          }
+        } else {
+          slot.textContent = '';
+          slot.classList.add('hidden');
+          clearError(name);
+        }
+      });
+
+      // Take the person straight to the first thing that needs fixing.
+      const first = invalid[0];
+      if (first) {
+        first.scrollIntoView({ block: 'center', behavior: 'smooth' });
+        first.focus({ preventScroll: true });
+      }
+    };
+
+    // Clear a field's error as soon as the person starts fixing it.
+    form.addEventListener('input', (event) => {
+      const target = event.target as HTMLElement & { name?: string };
+      if (target?.name) clearError(target.name);
+    });
+
+    form.addEventListener('submit', async (event) => {
+      event.preventDefault();
+      formError.classList.add('hidden');
+
+      const raw = readForm();
+      const { ok, errors, data } = validateRequest(raw);
+      if (!ok) {
+        showErrors(errors as Record<string, string | undefined>);
+        return;
+      }
+      showErrors({});
+
+      const honeypot = form.elements.namedItem(
+        HONEYPOT_FIELD,
+      ) as HTMLInputElement | null;
+
+      const token =
+        (form.elements.namedItem('cf-turnstile-response') as
+          | HTMLInputElement
+          | null)?.value ?? '';
+
+      submitBtn.disabled = true;
+      if (label) label.textContent = 'Sending...';
+
+      try {
+        const res = await fetch('/api/request', {
+          method: 'POST',
+          headers: { 'content-type': 'application/json' },
+          body: JSON.stringify({
+            ...data,
+            [HONEYPOT_FIELD]: honeypot?.value ?? '',
+            'cf-turnstile-response': token,
+          }),
+        });
+
+        const body = (await res.json().catch(() => ({}))) as {
+          ok?: boolean;
+          errors?: Record<string, string>;
+          message?: string;
+        };
+
+        if (res.ok && body.ok) {
+          form.classList.add('hidden');
+          success.classList.remove('hidden');
+          success.scrollIntoView({ block: 'center', behavior: 'smooth' });
+          return;
+        }
+
+        // Values stay exactly as entered so nothing has to be retyped.
+        if (body.errors && Object.keys(body.errors).length > 0) {
+          showErrors(body.errors);
+        }
+        formError.textContent = body.message || GENERIC_ERROR;
+        formError.classList.remove('hidden');
+      } catch {
+        formError.textContent = GENERIC_ERROR;
+        formError.classList.remove('hidden');
+      } finally {
+        submitBtn.disabled = false;
+        if (label) label.textContent = 'Send my request';
+        const turnstile = (window as unknown as { turnstile?: { reset: () => void } })
+          .turnstile;
+        turnstile?.reset();
+      }
+    });
+  }
+</script>

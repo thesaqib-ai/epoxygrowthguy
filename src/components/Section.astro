@@ -1,0 +1,30 @@
+---
+type Props = {
+  id?: string;
+  heading: string;
+  eyebrow?: string;
+  intro?: string;
+  class?: string;
+};
+
+const { id, heading, eyebrow, intro, class: className = '' } = Astro.props;
+---
+
+<section id={id} class:list={['wrap py-16 sm:py-24', className]}>
+  <div class="reveal">
+    <div class="rule"></div>
+    {eyebrow && <p class="eyebrow mt-5">{eyebrow}</p>}
+    <h2 class="mt-5 text-3xl sm:text-4xl lg:text-5xl">{heading}</h2>
+    {
+      intro && (
+        <p class="mt-4 max-w-xl text-base leading-relaxed text-muted sm:text-lg">
+          {intro}
+        </p>
+      )
+    }
+  </div>
+
+  <div class="mt-10 sm:mt-12">
+    <slot />
+  </div>
+</section>

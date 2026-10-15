@@ -1,0 +1,66 @@
+---
+import { site, instagramUrl } from '../config';
+---
+
+<section class="relative overflow-hidden">
+  <!-- Faint metallic swirl behind the hero. Pure CSS, so there is no extra
+       request, and it sits far below text contrast. -->
+  <div class="pointer-events-none absolute inset-0 -z-10" aria-hidden="true">
+    <div
+      class="absolute -left-1/4 -top-1/3 h-[42rem] w-[42rem] rounded-full opacity-[0.16] blur-3xl"
+      style="background: radial-gradient(closest-side, #D4A84B, transparent 70%)"
+    >
+    </div>
+    <div
+      class="absolute -right-1/4 top-1/4 h-[34rem] w-[34rem] rounded-full opacity-[0.10] blur-3xl"
+      style="background: radial-gradient(closest-side, #7a6a9a, transparent 70%)"
+    >
+    </div>
+    <div
+      class="absolute inset-x-0 bottom-0 h-40"
+      style="background: linear-gradient(to bottom, transparent, #0B0B0C)"
+    >
+    </div>
+  </div>
+
+  <div class="wrap py-16 sm:py-24 lg:py-32">
+    <div class="reveal max-w-3xl">
+      <p class="eyebrow">{site.seriesName}</p>
+
+      <h1
+        class="mt-5 text-[2.75rem] leading-[0.95] sm:text-6xl lg:text-7xl"
+      >
+        Conversations with the people building the epoxy industry.
+      </h1>
+
+      <p class="mt-6 max-w-2xl text-lg leading-relaxed text-muted sm:text-xl">
+        Short, honest interviews with installers, artists, suppliers and
+        educators across the US, Canada, the UK and Australia.
+      </p>
+
+      <div class="mt-9 flex flex-wrap items-center gap-3">
+        <a href="#request" class="btn btn-primary">Request an interview</a>
+        <a
+          href={instagramUrl}
+          target="_blank"
+          rel="noopener"
+          class="btn btn-ghost"
+        >
+          Watch the interviews
+        </a>
+      </div>
+
+      <p class="mt-6 text-sm text-faint">
+        Hosted by {site.hostName} <span class="px-1">·</span>
+        <a
+          href={instagramUrl}
+          target="_blank"
+          rel="noopener"
+          class="text-muted underline decoration-ink-600 underline-offset-4 transition-colors hover:text-gold-400"
+        >
+          @{site.instagramHandle}
+        </a>
+      </p>
+    </div>
+  </div>
+</section>

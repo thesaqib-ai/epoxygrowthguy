@@ -1,0 +1,13 @@
+﻿node_modules/
+dist/
+.astro/
+.wrangler/
+.dev.vars
+.env
+.env.*
+!.env.example
+.DS_Store
+*.log
+
+# Personal tooling, not part of the project.
+.claude/settings.local.json

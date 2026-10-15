@@ -1,0 +1,27 @@
+name = "epoxygrowthguy"
+pages_build_output_dir = "dist"
+compatibility_date = "2026-10-01"
+compatibility_flags = ["nodejs_compat"]
+
+# KV namespace used only by the form rate limit.
+# Create it once with:
+#   npx wrangler kv namespace create RATE_LIMIT
+#   npx wrangler kv namespace create RATE_LIMIT --preview
+# then paste the ids below.
+[[kv_namespaces]]
+binding = "RATE_LIMIT"
+id = "replace-with-your-kv-namespace-id"
+preview_id = "replace-with-your-preview-kv-namespace-id"
+
+[vars]
+# "supabase" (default) or "airtable". See src/lib/store.ts.
+STORE_TARGET = "supabase"
+
+# Secrets are set in the Cloudflare dashboard, never here:
+#   TURNSTILE_SECRET_KEY
+#   SUPABASE_URL
+#   SUPABASE_SERVICE_ROLE_KEY
+#   N8N_WEBHOOK_URL
+#   N8N_WEBHOOK_SECRET
+# PUBLIC_TURNSTILE_SITE_KEY is a build time variable, set it in the Pages
+# build settings so Astro can read it.

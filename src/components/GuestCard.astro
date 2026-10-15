@@ -1,0 +1,84 @@
+---
+import { Image } from 'astro:assets';
+import type { Guest } from '../data/guests';
+import { instagramProfileUrl } from '../config';
+
+type Props = { guest: Guest; index?: number };
+
+const { guest, index = 0 } = Astro.props;
+
+// Photos are optimized at build time. Drop a square image into
+// src/assets/guests/ and point `photo` at the file name.
+const photos = import.meta.glob<{ default: ImageMetadata }>(
+  '/src/assets/guests/*.{jpeg,jpg,png,webp,avif}',
+);
+const key = guest.photo ? `/src/assets/guests/${guest.photo}` : '';
+const loader = key && photos[key] ? photos[key] : undefined;
+const photo = loader ? (await loader()).default : undefined;
+
+// Fall back to clean initials when there is no photo.
+const label = guest.name || guest.business;
+const initials = label
+  .split(/\s+/)
+  .filter(Boolean)
+  .slice(0, 2)
+  .map((word) => word[0]?.toUpperCase() ?? '')
+  .join('');
+---
+
+<article
+  class="reveal group flex flex-col items-center rounded-2xl border border-white/5 bg-ink-900/60 px-4 py-6 text-center transition-colors hover:border-gold-400/30"
+  style={`--reveal-delay: ${Math.min(index, 11) * 60}ms`}
+>
+  {
+    photo ? (
+      <Image
+        src={photo}
+        alt={label}
+        width={160}
+        height={160}
+        densities={[1, 2]}
+        format="avif"
+        loading="lazy"
+        decoding="async"
+        class="h-20 w-20 rounded-full object-cover ring-1 ring-white/10 sm:h-24 sm:w-24"
+      />
+    ) : (
+      <div
+        class="flex h-20 w-20 items-center justify-center rounded-full bg-ink-800 font-display text-xl text-gold-400 ring-1 ring-white/10 sm:h-24 sm:w-24 sm:text-2xl"
+        aria-hidden="true"
+      >
+        {initials}
+      </div>
+    )
+  }
+
+  {
+    guest.name && (
+      <h3 class="mt-4 text-base normal-case tracking-normal sm:text-lg">
+        {guest.name}
+      </h3>
+    )
+  }
+
+  {
+    guest.business && (
+      <p class="mt-1 text-sm leading-snug text-muted">{guest.business}</p>
+    )
+  }
+
+  {guest.location && <p class="mt-1 text-xs text-faint">{guest.location}</p>}
+
+  {
+    guest.instagram && (
+      <a
+        href={instagramProfileUrl(guest.instagram)}
+        target="_blank"
+        rel="noopener"
+        class="mt-3 text-xs text-faint underline decoration-ink-700 underline-offset-4 transition-colors hover:text-gold-400"
+      >
+        @{guest.instagram}
+      </a>
+    )
+  }
+</article>
