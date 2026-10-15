@@ -18,6 +18,19 @@ export const site = {
   /** [CONFIG] contactEmail */
   contactEmail: 'saqib@epoxygrowthguy.com',
 
+  /**
+   * Transactional email. The `from` address has to sit on the domain that is
+   * onboarded to Cloudflare Email Sending, so keep it on epoxygrowthguy.com.
+   *
+   * Where the heads up lands is set with the NOTIFY_EMAIL variable in
+   * Cloudflare, so a personal inbox never has to live in this repo. Without
+   * it, the notification goes to contactEmail.
+   */
+  mail: {
+    from: 'requests@epoxygrowthguy.com',
+    fromName: 'Epoxy Growth Sessions',
+  },
+
   /** Instagram handle, without the @. */
   instagramHandle: 'epoxy_growth_guy',
 

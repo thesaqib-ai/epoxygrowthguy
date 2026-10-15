@@ -13,6 +13,12 @@ binding = "RATE_LIMIT"
 id = "replace-with-your-kv-namespace-id"
 preview_id = "replace-with-your-preview-kv-namespace-id"
 
+# Transactional email, sent straight from the Pages Function.
+# The domain has to be onboarded first:
+#   npx wrangler email sending enable epoxygrowthguy.com
+[[send_email]]
+name = "EMAIL"
+
 [vars]
 # "supabase" (default) or "airtable". See src/lib/store.ts.
 STORE_TARGET = "supabase"
@@ -21,7 +27,6 @@ STORE_TARGET = "supabase"
 #   TURNSTILE_SECRET_KEY
 #   SUPABASE_URL
 #   SUPABASE_SERVICE_ROLE_KEY
-#   N8N_WEBHOOK_URL
-#   N8N_WEBHOOK_SECRET
+#   NOTIFY_EMAIL              where the heads up lands
 # PUBLIC_TURNSTILE_SITE_KEY is a build time variable, set it in the Pages
 # build settings so Astro can read it.

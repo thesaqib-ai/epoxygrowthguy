@@ -1,6 +1,7 @@
 /**
- * Throwaway stub that stands in for Supabase and n8n while testing the
- * Pages Function locally. Not used in production.
+ * Throwaway stub that stands in for Supabase while testing the Pages Function
+ * locally, so a submission can be saved without touching the real database.
+ * Not used in production.
  *
  *   node scripts/stub-server.mjs
  */

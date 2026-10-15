@@ -31,7 +31,7 @@ warning, which is what you want locally.
 ```bash
 node scripts/make-images.mjs     # regenerate favicon png and the OG image
 FACES=1 node scripts/make-images.mjs   # same, with a row of guest faces
-node scripts/stub-server.mjs     # fake Supabase and n8n for local testing
+node scripts/stub-server.mjs     # fake Supabase for local testing
 ```
 
 ## Adding a guest
@@ -76,14 +76,14 @@ functions/api/request.ts
    3. Validate and clean every field again, server side
    4. Rate limit, 3 per IP per hour, in KV
    5. Insert the row (src/lib/store.ts)
-   6. POST to the n8n webhook, fire and forget, 3 second timeout
+   6. Email Saqib and auto reply to the requester (src/lib/notify.ts)
    7. Return { ok: true }
-   v
-n8n (built outside this repo, see docs/n8n-auto-reply.md)
 ```
 
-If n8n is down the row is still saved and the person still sees success. The
-failure goes to the Pages Function logs.
+Step 6 runs after the response has already gone back to the browser, so a mail
+outage cannot turn a saved request into an error on screen. Failures go to the
+Pages Function logs. See `docs/emails.md` for both emails and the one time
+domain setup.
 
 ### Storage
 
@@ -115,18 +115,23 @@ entirely in `src/lib/store.ts`.
    | `TURNSTILE_SECRET_KEY` | secret | |
    | `SUPABASE_URL` | secret | |
    | `SUPABASE_SERVICE_ROLE_KEY` | secret | never goes near the browser |
-   | `N8N_WEBHOOK_URL` | secret | |
-   | `N8N_WEBHOOK_SECRET` | secret | sent as `x-webhook-secret` |
+   | `NOTIFY_EMAIL` | secret | where the heads up lands, keeps a personal inbox out of the repo |
    | `STORE_TARGET` | plain | `supabase` or `airtable` |
 
-4. Add `epoxygrowthguy.com` as a custom domain, and `www.epoxygrowthguy.com`
+4. Turn on email sending for the domain, once:
+   ```bash
+   npx wrangler email sending enable epoxygrowthguy.com
+   ```
+   This adds the SPF and DKIM records. Nothing sends until it is done. Full
+   detail in `docs/emails.md`.
+5. Add `epoxygrowthguy.com` as a custom domain, and `www.epoxygrowthguy.com`
    too. HTTPS is forced by Cloudflare.
-5. Send `www` to the apex with a Redirect Rule on the zone
+6. Send `www` to the apex with a Redirect Rule on the zone
    (Rules, Redirect Rules, single redirect): when hostname equals
    `www.epoxygrowthguy.com`, a 301 to
    `https://epoxygrowthguy.com` with the path and query preserved.
    `_redirects` cannot do this, it only accepts relative paths.
-6. Turn on Web Analytics for the Pages project. Cloudflare injects the beacon,
+7. Turn on Web Analytics for the Pages project. Cloudflare injects the beacon,
    there is nothing to add to the code and no cookie banner is needed.
 
 ## Things worth knowing

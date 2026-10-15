@@ -6,24 +6,24 @@
  * 3. Validate and clean every field again, server side
  * 4. Rate limit to 3 requests per IP per hour
  * 5. Save to Supabase (or Airtable)
- * 6. Forward to the n8n webhook, fire and forget, 3 second timeout
+ * 6. Email Saqib, and send the person a short "got it", after the response
  * 7. Return { ok: true }
  *
- * If n8n is down the row is still saved and the person still sees success.
+ * If the email step fails the row is still saved and the person still sees
+ * success. The failure is logged.
  */
 import { validateRequest, HONEYPOT_FIELD } from '../../src/lib/form-schema';
 import { saveRequest, type StoreEnv } from '../../src/lib/store';
+import { sendNotifications, type MailEnv } from '../../src/lib/notify';
 
-type Env = StoreEnv & {
-  TURNSTILE_SECRET_KEY?: string;
-  N8N_WEBHOOK_URL?: string;
-  N8N_WEBHOOK_SECRET?: string;
-  RATE_LIMIT?: KVNamespace;
-};
+type Env = StoreEnv &
+  MailEnv & {
+    TURNSTILE_SECRET_KEY?: string;
+    RATE_LIMIT?: KVNamespace;
+  };
 
 const RATE_LIMIT_MAX = 3;
 const RATE_LIMIT_WINDOW_SECONDS = 60 * 60;
-const N8N_TIMEOUT_MS = 3000;
 
 const GENERIC_ERROR =
   'Something went wrong sending that. Please try again, or DM me on Instagram at @epoxy_growth_guy.';
@@ -75,33 +75,6 @@ async function overRateLimit(kv: KVNamespace, ip: string): Promise<boolean> {
     expirationTtl: RATE_LIMIT_WINDOW_SECONDS + 60,
   });
   return false;
-}
-
-async function forwardToN8n(
-  payload: unknown,
-  env: Env,
-  recordId: string | null,
-): Promise<void> {
-  if (!env.N8N_WEBHOOK_URL) return;
-  try {
-    const res = await fetch(env.N8N_WEBHOOK_URL, {
-      method: 'POST',
-      headers: {
-        'content-type': 'application/json',
-        ...(env.N8N_WEBHOOK_SECRET
-          ? { 'x-webhook-secret': env.N8N_WEBHOOK_SECRET }
-          : {}),
-      },
-      body: JSON.stringify({ ...(payload as object), record_id: recordId }),
-      signal: AbortSignal.timeout(N8N_TIMEOUT_MS),
-    });
-    if (!res.ok) {
-      console.error('n8n webhook returned', res.status, await res.text());
-    }
-  } catch (error) {
-    // The row is already saved, so a failure here never reaches the person.
-    console.error('n8n webhook failed', error);
-  }
 }
 
 export const onRequestPost: PagesFunction<Env> = async (context) => {
@@ -195,8 +168,8 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
     return json({ ok: false, message: GENERIC_ERROR }, 500);
   }
 
-  // 6. Hand it to n8n without making the person wait.
-  waitUntil(forwardToN8n(data, env, recordId));
+  // 6. Send the emails without making the person wait for them.
+  waitUntil(sendNotifications(data, env, recordId));
 
   // 7. Done.
   return json({ ok: true });
