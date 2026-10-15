@@ -42,7 +42,7 @@ export const guests: Guest[] = [
     business: 'Dallas Epoxy Guys',
     location: 'Dallas, TX',
     instagram: 'dallasepoxyguys',
-    approved: false,
+    approved: true,
     order: 10,
   },
   {
@@ -51,7 +51,7 @@ export const guests: Guest[] = [
     business: 'Don Resin Studios',
     location: 'Miami, FL',
     instagram: 'don_resin',
-    approved: false,
+    approved: true,
     order: 20,
   },
   {
@@ -60,7 +60,7 @@ export const guests: Guest[] = [
     business: 'El Patron Resin',
     location: 'Australia',
     instagram: 'elpatron_resin',
-    approved: false,
+    approved: true,
     order: 30,
   },
   {
@@ -70,7 +70,7 @@ export const guests: Guest[] = [
     location: '',
     // Confirm the handle before this goes live.
     instagram: '',
-    approved: false,
+    approved: true,
     order: 40,
   },
   {
@@ -79,7 +79,7 @@ export const guests: Guest[] = [
     business: 'Ace High Concrete Supply',
     location: '',
     instagram: 'acehighconcrete',
-    approved: false,
+    approved: true,
     order: 50,
   },
   {
@@ -88,7 +88,7 @@ export const guests: Guest[] = [
     business: 'Garage Style Ltd',
     location: 'Hertfordshire, UK',
     instagram: 'garagestyleltd',
-    approved: false,
+    approved: true,
     order: 60,
   },
   {
@@ -97,7 +97,7 @@ export const guests: Guest[] = [
     business: 'Mint Concrete Polishing',
     location: 'Gilbert, AZ',
     instagram: 'dannyjcarpenter',
-    approved: false,
+    approved: true,
     order: 70,
   },
   {
@@ -106,7 +106,7 @@ export const guests: Guest[] = [
     business: 'N&A Epoxy Flooring',
     location: 'Sydney, Australia',
     instagram: 'na_epoxy_floors',
-    approved: false,
+    approved: true,
     order: 80,
   },
   {
@@ -115,7 +115,7 @@ export const guests: Guest[] = [
     business: 'Limitless Epoxy Designs',
     location: 'Plainville, CT',
     instagram: 'jay_380_',
-    approved: false,
+    approved: true,
     order: 90,
   },
   {
@@ -124,7 +124,7 @@ export const guests: Guest[] = [
     business: 'Superior Concrete Solutions',
     location: 'Alabama and Florida',
     instagram: '',
-    approved: false,
+    approved: true,
     order: 100,
   },
   {
@@ -133,7 +133,7 @@ export const guests: Guest[] = [
     business: 'Smooth Coatings',
     location: 'Southwest Virginia',
     instagram: 'smooth_coatings',
-    approved: false,
+    approved: true,
     order: 110,
   },
   {
@@ -142,7 +142,7 @@ export const guests: Guest[] = [
     business: 'Lone Wolf Coatings',
     location: '',
     instagram: 'lonewolfcoatings',
-    approved: false,
+    approved: true,
     order: 120,
   },
 ];
