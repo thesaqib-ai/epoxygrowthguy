@@ -97,6 +97,10 @@ entirely in `src/lib/store.ts`.
 
 ## Deploying
 
+**Setting this up for the first time? Follow `docs/launch-checklist.md`.** It
+walks through every step with the exact clicks and values. The summary below is
+for when you already know the shape of it.
+
 1. Push to GitHub and connect the repo in Cloudflare Pages.
    - Build command: `npm run build`
    - Output directory: `dist`
