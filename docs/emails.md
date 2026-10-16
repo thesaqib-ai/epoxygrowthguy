@@ -43,12 +43,16 @@ email. The Supabase row id is at the bottom.
 > Thanks for reaching out about the Epoxy Growth Sessions. I've got your
 > details and I'll look through them in the next 48 hours.
 >
-> If it's a fit, I'll send you a link to pick a time. The call is relaxed,
-> about 15 to 20 minutes, and I'll send you the questions before we record.
+> If it's a fit, I'll contact you to arrange a time. The call is relaxed and
+> takes about 15 to 20 minutes.
 >
 > Talk soon,
-> Saqib
+> Muhammad Saqib S.
 > @epoxy_growth_guy
+
+It deliberately promises nothing about *how* contact happens. No booking link,
+no questions in advance. That keeps the reply honest whatever you decide to do
+next, and leaves you free to change the process without the email going stale.
 
 The first name is the first word of what they typed. If they only gave one
 word, that word is used. If the name is somehow blank, it falls back to

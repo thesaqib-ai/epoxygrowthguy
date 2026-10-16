@@ -206,7 +206,7 @@ async function autoReply(
 
 Thanks for reaching out about the Epoxy Growth Sessions. I've got your details and I'll look through them in the next 48 hours.
 
-If it's a fit, I'll send you a link to pick a time. The call is relaxed, about 15 to 20 minutes, and I'll send you the questions before we record.
+If it's a fit, I'll contact you to arrange a time. The call is relaxed and takes about 15 to 20 minutes.
 
 Talk soon,
 ${site.hostName}
@@ -215,7 +215,7 @@ ${site.hostName}
   const html = `<div style="font:15px/1.6 -apple-system,Segoe UI,Roboto,sans-serif;max-width:34rem">
 <p>Hi ${esc(name)},</p>
 <p>Thanks for reaching out about the Epoxy Growth Sessions. I've got your details and I'll look through them in the next 48 hours.</p>
-<p>If it's a fit, I'll send you a link to pick a time. The call is relaxed, about 15 to 20 minutes, and I'll send you the questions before we record.</p>
+<p>If it's a fit, I'll contact you to arrange a time. The call is relaxed and takes about 15 to 20 minutes.</p>
 <p>Talk soon,<br />${esc(site.hostName)}<br /><a href="https://www.instagram.com/${esc(site.instagramHandle)}/" style="color:#9a7520">@${esc(site.instagramHandle)}</a></p>
 </div>`;
 

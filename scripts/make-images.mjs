@@ -81,7 +81,7 @@ const ogSvg = `<svg xmlns="http://www.w3.org/2000/svg" width="${W}" height="${H}
   <rect x="80" y="480" width="56" height="3" fill="${GOLD}"/>
 
   <text x="80" y="546" font-family="${SANS}" font-size="27" fill="${MUTED}">
-    Hosted by Saqib  ·  @epoxy_growth_guy
+    Hosted by Muhammad Saqib S.  ·  @epoxy_growth_guy
   </text>
 
   <text x="${W - 80}" y="546" text-anchor="end" font-family="${SANS}"

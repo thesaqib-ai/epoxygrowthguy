@@ -11,9 +11,12 @@ export const site = {
   /** Wordmark used in the top bar and footer. */
   wordmark: 'Epoxy Growth Guy',
 
-  /** Host details. */
-  hostName: 'Saqib',
-  hostLegalName: 'Muhammad Saqib',
+  /**
+   * Host details. Always the full name, everywhere it appears: the hero line,
+   * the footer, the email signature and the email sender.
+   */
+  hostName: 'Muhammad Saqib S.',
+  hostLegalName: 'Muhammad Saqib S.',
 
   /** [CONFIG] contactEmail. Shown in the footer and on the privacy page. */
   contactEmail: 'muhammad.saqib@autosinq.com',
@@ -31,7 +34,7 @@ export const site = {
    */
   mail: {
     from: 'muhammad.saqib@autosinq.com',
-    fromName: 'Muhammad Saqib',
+    fromName: 'Muhammad Saqib S.',
   },
 
   /** Instagram handle, without the @. */
@@ -68,7 +71,7 @@ export const site = {
     title:
       'The Epoxy Growth Sessions | Interviews with the people building the epoxy industry',
     description:
-      'Short, honest interviews with epoxy installers, artists, suppliers and educators. Hosted by Saqib, @epoxy_growth_guy. Request an interview.',
+      'Short, honest interviews with epoxy installers, artists, suppliers and educators. Hosted by Muhammad Saqib S., @epoxy_growth_guy. Request an interview.',
     ogImage: '/og.png',
   },
 } as const;
