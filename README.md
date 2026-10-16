@@ -71,7 +71,7 @@ Browser form
    |  POST /api/request (JSON)
    v
 functions/api/request.ts
-   1. Verify the Turnstile token
+   1. Check the Turnstile token, advisory only, never blocks
    2. Honeypot filled, return 200 and save nothing
    3. Validate and clean every field again, server side
    4. Rate limit, 3 per IP per hour, in KV
@@ -136,6 +136,26 @@ for when you already know the shape of it.
    `_redirects` cannot do this, it only accepts relative paths.
 7. Turn on Web Analytics for the Pages project. Cloudflare injects the beacon,
    there is nothing to add to the code and no cookie banner is needed.
+
+### Spam protection, and why Turnstile does not block
+
+Three layers, and only two of them are gates:
+
+| Layer | Blocks? | What it does |
+|---|---|---|
+| Honeypot | **yes** | a hidden field. Filled in means a bot. Returns 200 and saves nothing, so the bot never learns |
+| Rate limit | **yes** | 3 per IP per hour, in KV. Per visitor, never a cap on what you receive |
+| Turnstile | no | records what it thought, and says so in the notification email |
+
+Turnstile is deliberately advisory. It fails for reasons that have nothing to
+do with bots: a hostname missing from the widget config, an ad blocker, a
+corporate proxy, or a token that quietly expired while someone filled the form
+in slowly. Every one of those used to show a real person a red error and lose
+the request. A blocked guest costs far more than a spam row that takes two
+seconds to delete, and every request is read by hand anyway.
+
+When a request arrives without a clean check, the notification email says so
+near the top, so it can be judged rather than silently trusted.
 
 ## Things worth knowing
 

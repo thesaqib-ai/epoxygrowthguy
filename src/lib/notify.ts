@@ -32,6 +32,26 @@ export type MailEnv = {
   NOTIFY_EMAIL?: string;
 };
 
+/**
+ * What the Turnstile check thought. It never blocks a submission, so this is
+ * a note for Saqib rather than a verdict.
+ *
+ *   verified  the visitor passed, which is the ordinary case
+ *   missing   no token arrived, usually the widget failed to load
+ *   failed    a token arrived but did not check out, often simply expired
+ *   skipped   no secret key configured, which is local development
+ */
+export type BotCheck = 'verified' | 'missing' | 'failed' | 'skipped';
+
+const BOT_CHECK_NOTE: Record<Exclude<BotCheck, 'verified'>, string> = {
+  missing:
+    'Heads up: the bot check did not run for this one, usually because the widget failed to load. Worth a glance before you reply.',
+  failed:
+    'Heads up: the bot check did not pass for this one. That often just means the form was open a long time and the token expired, so read it before assuming anything.',
+  skipped:
+    'Heads up: no bot check was configured when this arrived.',
+};
+
 /** Escapes anything a stranger typed before it goes near an HTML body. */
 const esc = (value: string): string =>
   value
@@ -134,8 +154,12 @@ async function notifyOwner(
   data: RequestPayload,
   to: string,
   recordId: string | null,
+  botCheck: BotCheck,
 ): Promise<boolean> {
   const rows = fields(data);
+  // Only say anything when it is not the ordinary case, so a normal request
+  // stays a clean read.
+  const note = botCheck === 'verified' ? '' : BOT_CHECK_NOTE[botCheck];
 
   const text = [
     'New interview request.',
@@ -143,11 +167,13 @@ async function notifyOwner(
     ...rows.map(([label, value]) => `${label}: ${value}`),
     '',
     ...(recordId ? [`Row: ${recordId}`, ''] : []),
+    ...(note ? [note, ''] : []),
     'Reply to this email to answer them directly.',
   ].join('\n');
 
   const html = `<div style="font:15px/1.6 -apple-system,Segoe UI,Roboto,sans-serif">
 <p style="margin:0 0 16px"><strong>New interview request.</strong></p>
+${note ? `<p style="margin:0 0 16px;padding:10px 12px;background:#fff6e5;border-left:3px solid #d4a84b;color:#5c4813;font-size:14px">${esc(note)}</p>` : ''}
 <table cellpadding="6" style="border-collapse:collapse">
 ${rows
   .map(
@@ -207,6 +233,7 @@ export async function sendNotifications(
   data: RequestPayload,
   env: MailEnv,
   recordId: string | null,
+  botCheck: BotCheck = 'skipped',
 ): Promise<void> {
   // Neither call rejects, so this cannot throw into waitUntil.
   await Promise.all([
@@ -215,6 +242,7 @@ export async function sendNotifications(
       data,
       env.NOTIFY_EMAIL || site.contactEmail,
       recordId,
+      botCheck,
     ),
     autoReply(env.RESEND_API_KEY, data),
   ]);

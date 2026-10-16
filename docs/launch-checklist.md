@@ -298,10 +298,15 @@ Now confirm all four things that should have happened:
 6. **They were told.** Check the inbox you used in the form for
    `Got your interview request`. Check the spam folder too. If it is in spam,
    go back to step C6.
-7. **The bot checks work.** Submit the form three more times. The fourth
+7. **The rate limit works.** Submit the form three more times. The fourth
    attempt within the hour should be refused with:
 
    > You have sent a few requests already. Give it an hour and try again.
+
+   This is the gate that actually holds, along with the honeypot. Turnstile is
+   advisory and never blocks anyone, so there is nothing else to test there.
+   The counter is per IP address, not global, so this never limits how many
+   requests you can receive from different people.
 
 8. Delete your test rows from the Supabase table when you are done.
 
@@ -309,12 +314,20 @@ Now confirm all four things that should have happened:
 
 ## If something does not work
 
-**The form says "That security check did not pass."**
-The Turnstile keys are mismatched or the site key never reached the build. View
-source on the live page and search for `cf-turnstile`. If it is missing, the
-site key was not present at build time: check it is set as plain text in
-Production, then retry the deployment. If it is present, the secret key in
-Cloudflare does not match the widget the site key came from.
+**The notification email says the bot check did not run.**
+Not a fault, and nothing was lost. Turnstile is advisory: it never blocks a
+submission, so a widget that fails to load lets the person through and tells
+you about it instead. Common causes are the hostname missing from the widget
+config in the Turnstile dashboard, an ad blocker, or a token that expired while
+someone filled the form in slowly. If every request says this, check the
+hostnames on the widget: `epoxygrowthguy.com`, `www.epoxygrowthguy.com` and
+`epoxygrowthguy.pages.dev` should all be listed.
+
+**The widget does not appear on the page at all.**
+Open the browser console on the live site. `Error: 110200` means the hostname
+is not on the widget's allowed list, which is the fix above. If the console is
+clean but the widget is missing, view source and search for `cf-turnstile`. If
+that is absent the site key is not in `src/config.ts`.
 
 **The form says "Something went wrong sending that."**
 Supabase rejected the insert. Pages project > **Functions** > **Logs**, submit

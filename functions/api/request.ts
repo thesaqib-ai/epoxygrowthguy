@@ -14,7 +14,11 @@
  */
 import { validateRequest, HONEYPOT_FIELD } from '../../src/lib/form-schema';
 import { saveRequest, type StoreEnv } from '../../src/lib/store';
-import { sendNotifications, type MailEnv } from '../../src/lib/notify';
+import {
+  sendNotifications,
+  type MailEnv,
+  type BotCheck,
+} from '../../src/lib/notify';
 
 type Env = StoreEnv &
   MailEnv & {
@@ -96,23 +100,35 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
     request.headers.get('x-forwarded-for')?.split(',')[0]?.trim() ||
     '';
 
-  // 1. Turnstile. Skipped only when no secret is configured, which is the
-  //    local development case.
+  /**
+   * 1. Turnstile, ADVISORY ONLY. It never blocks a submission.
+   *
+   * A blocked guest costs far more than a spam row that takes two seconds to
+   * delete, and Saqib reads every request by hand anyway. The widget also
+   * fails for reasons that have nothing to do with bots: a hostname missing
+   * from the widget config, a blocked third party script, a corporate proxy,
+   * or simply a token that expired while someone filled the form in slowly.
+   * Every one of those used to produce a red error on a real person's screen.
+   *
+   * The honeypot and the rate limit are the gates that actually hold. This
+   * records what the check thought and passes it along for Saqib to judge.
+   */
+  let botCheck: BotCheck = 'skipped';
   if (env.TURNSTILE_SECRET_KEY) {
-    const token = typeof raw['cf-turnstile-response'] === 'string'
-      ? raw['cf-turnstile-response']
-      : '';
-    const passed = token
-      ? await verifyTurnstile(token, ip, env.TURNSTILE_SECRET_KEY)
-      : false;
-    if (!passed) {
-      return json(
-        {
-          ok: false,
-          message:
-            'That security check did not pass. Please reload the page and try again.',
-        },
-        403,
+    const token =
+      typeof raw['cf-turnstile-response'] === 'string'
+        ? raw['cf-turnstile-response']
+        : '';
+    if (!token) {
+      botCheck = 'missing';
+    } else {
+      botCheck = (await verifyTurnstile(token, ip, env.TURNSTILE_SECRET_KEY))
+        ? 'verified'
+        : 'failed';
+    }
+    if (botCheck !== 'verified') {
+      console.warn(
+        `Turnstile ${botCheck}, letting the request through anyway. IP ${ip || 'unknown'}`,
       );
     }
   } else {
@@ -169,7 +185,7 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
   }
 
   // 6. Send the emails without making the person wait for them.
-  waitUntil(sendNotifications(data, env, recordId));
+  waitUntil(sendNotifications(data, env, recordId, botCheck));
 
   // 7. Done.
   return json({ ok: true });
