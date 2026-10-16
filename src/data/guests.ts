@@ -138,13 +138,43 @@ export const guests: Guest[] = [
   },
 ];
 
+/**
+ * ORDER DECIDES WHAT IS SHOWN. The section renders the first four approved
+ * reels, per the brief's "show 3 or 4". All six are listed, so swapping one in
+ * is a matter of moving it above the line rather than hunting for an id.
+ *
+ * The four chosen cover four different questions. Sam Serio and Stephon
+ * Fauntroy sit below the line because their hooks say nearly the same thing
+ * as each other, "will ruin your floor" and "could fail because of this", and
+ * running both spends two of four slots on one idea.
+ */
 export const featuredReels: FeaturedReel[] = [
+  {
+    guestSlug: 'christopher-land',
+    reelId: 'DdkiZpjIV-w',
+    hook: 'Why customers choose one contractor over another',
+    approved: true,
+  },
+  {
+    guestSlug: 'don-resin',
+    reelId: 'DeUwXJHtKiC',
+    hook: 'Is it too late to start an epoxy business in 2026?',
+    approved: true,
+  },
   {
     guestSlug: 'danny-carpenter',
     reelId: 'DeH5cb0NzFv',
     hook: 'Epoxy vs polished concrete? Save 3 days of research in 30 seconds.',
     approved: true,
   },
+  {
+    guestSlug: 'sez',
+    reelId: 'DegaBUDtitE',
+    hook: "Customer says they're getting other quotes. Now what?",
+    approved: true,
+  },
+
+  // Below the line. Approved, ready, and not currently rendered.
   {
     guestSlug: 'sam-serio',
     reelId: 'DeJ8V_sNEcQ',
@@ -157,23 +187,6 @@ export const featuredReels: FeaturedReel[] = [
     hook: 'Your epoxy floor could fail because of this',
     approved: true,
   },
-  {
-    guestSlug: 'christopher-land',
-    reelId: 'DdkiZpjIV-w',
-    // Only the tail of the hook is readable on the thumbnail, something
-    // ending "contractor over another?". Waiting on the full line from
-    // Saqib rather than inventing the start of it.
-    hook: '',
-    approved: false,
-  },
-
-  // Two more thumbnails are sitting in src/assets/reels/ with no entry here,
-  // because the guest in each is not on the wall and I could not identify
-  // them from the frame:
-  //   DeUwXJHtKiC  a Rock Hard Epoxy cap, "Is it too late to start an epoxy
-  //                business in 2026?"
-  //   DegaBUDtitE  "Customer says they're getting other quotes. Now what?"
-  // Add the guest first, then a row here.
 ];
 
 /** Approved guests only, in display order. */
