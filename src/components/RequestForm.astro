@@ -9,7 +9,10 @@ import {
 } from '../lib/form-schema';
 import { site, instagramUrl } from '../config';
 
-const turnstileSiteKey = import.meta.env.PUBLIC_TURNSTILE_SITE_KEY ?? '';
+// The key in config is the real one. The environment variable is only an
+// override, for pointing a local build at Cloudflare's test keys.
+const turnstileSiteKey =
+  import.meta.env.PUBLIC_TURNSTILE_SITE_KEY || site.turnstileSiteKey;
 
 const fieldClass =
   'mt-2 w-full rounded-xl border border-ink-700 bg-ink-900 px-4 py-3 text-base text-paper placeholder:text-faint transition-colors focus:border-gold-400 focus:outline-none focus:ring-1 focus:ring-gold-400 aria-[invalid=true]:border-red-400/70';

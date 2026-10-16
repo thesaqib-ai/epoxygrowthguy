@@ -37,6 +37,20 @@ export const site = {
   /** Instagram handle, without the @. */
   instagramHandle: 'epoxy_growth_guy',
 
+  /**
+   * Turnstile SITE key. Public by design: it is written into the HTML of every
+   * page, so it is readable by anyone who views source. Safe in this repo.
+   *
+   * It lives here rather than in an environment variable because Astro needs
+   * it at BUILD time, and this project's plaintext variables are managed
+   * through wrangler.toml, which only supplies values at runtime. Keeping it
+   * in source means a build can never silently produce a page with no widget.
+   *
+   * The SECRET key is the other half and never appears in this repo. It is a
+   * Cloudflare secret, read only inside the Pages Function.
+   */
+  turnstileSiteKey: '0x4AAAAAAFXc_f7A2j4KwPx9',
+
   /** Canonical origin, no trailing slash. */
   url: 'https://epoxygrowthguy.com',
 
