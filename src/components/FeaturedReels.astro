@@ -1,7 +1,7 @@
 ---
 import { Image } from 'astro:assets';
 import Section from './Section.astro';
-import { approvedReels } from '../data/guests';
+import { approvedReels, reelUrl } from '../data/guests';
 
 const reels = approvedReels();
 
@@ -13,15 +13,12 @@ const thumbs = import.meta.glob<{ default: ImageMetadata }>(
 
 const cards = await Promise.all(
   reels.map(async (reel) => {
-    // Same as guest photos: a file named after the guest slug is found on its
-    // own, and setting `thumbnail` explicitly overrides that.
-    const bySlug = Object.keys(thumbs).find((path) => {
+    // The thumbnail is named after the reel id, so the image and the link
+    // come from the same value and cannot point at different reels.
+    const key = Object.keys(thumbs).find((path) => {
       const base = path.split('/').pop()?.replace(/\.[^.]+$/, '');
-      return base === reel.guestSlug;
+      return base === reel.reelId;
     });
-    const key = reel.thumbnail
-      ? `/src/assets/reels/${reel.thumbnail}`
-      : bySlug;
     const loader = key ? thumbs[key] : undefined;
     return { reel, image: loader ? (await loader()).default : undefined };
   }),
@@ -34,7 +31,7 @@ const cards = await Promise.all(
       <div class="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4">
         {cards.map(({ reel, image }, i) => (
           <a
-            href={reel.url}
+            href={reelUrl(reel.reelId)}
             target="_blank"
             rel="noopener"
             class="reveal group block"
@@ -85,7 +82,7 @@ const cards = await Promise.all(
                   </p>
                 )}
                 <p class="mt-1 text-xs leading-snug text-muted sm:text-sm">
-                  “{reel.quote}”
+                  {reel.hook}
                 </p>
               </div>
             </div>

@@ -30,18 +30,27 @@ export type Guest = {
 
 export type FeaturedReel = {
   guestSlug: string;
-  /** One short line, in the guest's own words. Never invented. */
-  quote: string;
   /**
-   * Usually leave this out. Any image in src/assets/reels/ named after the
-   * guest slug is found automatically. Only set it when a file cannot be
-   * renamed.
+   * The Instagram post id: the last part of the share link, and also the
+   * thumbnail file name in src/assets/reels/. One value gives both the link
+   * and the image, so the two can never drift apart.
    */
-  thumbnail?: string;
-  /** The real Instagram reel URL, not the profile. */
-  url: string;
+  reelId: string;
+  /**
+   * The hook burned into the reel itself.
+   *
+   * The reel's own words, never invented, and never rendered in quote marks,
+   * because it is a title rather than something the guest said on camera.
+   * Putting a hook in quotes would attribute a line to a real person who
+   * never said it.
+   */
+  hook: string;
   approved: boolean;
 };
+
+/** Instagram serves a reel from the generic post path. */
+export const reelUrl = (reelId: string): string =>
+  `https://www.instagram.com/p/${reelId}/`;
 
 export const guests: Guest[] = [
   {
@@ -131,23 +140,40 @@ export const guests: Guest[] = [
 
 export const featuredReels: FeaturedReel[] = [
   {
-    guestSlug: 'christopher-land',
-    quote: 'We stopped chasing cheap jobs and the business got easier.',
-    url: 'https://www.instagram.com/epoxy_growth_guy/',
-    approved: false,
-  },
-  {
-    guestSlug: 'don-resin',
-    quote: 'Art first, then the floors followed.',
-    url: 'https://www.instagram.com/epoxy_growth_guy/',
-    approved: false,
-  },
-  {
     guestSlug: 'danny-carpenter',
-    quote: 'Polished concrete taught me patience.',
-    url: 'https://www.instagram.com/epoxy_growth_guy/',
+    reelId: 'DeH5cb0NzFv',
+    hook: 'Epoxy vs polished concrete? Save 3 days of research in 30 seconds.',
+    approved: true,
+  },
+  {
+    guestSlug: 'sam-serio',
+    reelId: 'DeJ8V_sNEcQ',
+    hook: 'Forgetting THIS will completely ruin your epoxy floor',
+    approved: true,
+  },
+  {
+    guestSlug: 'lone-wolf-coatings',
+    reelId: 'DehDbVENdlE',
+    hook: 'Your epoxy floor could fail because of this',
+    approved: true,
+  },
+  {
+    guestSlug: 'christopher-land',
+    reelId: 'DdkiZpjIV-w',
+    // Only the tail of the hook is readable on the thumbnail, something
+    // ending "contractor over another?". Waiting on the full line from
+    // Saqib rather than inventing the start of it.
+    hook: '',
     approved: false,
   },
+
+  // Two more thumbnails are sitting in src/assets/reels/ with no entry here,
+  // because the guest in each is not on the wall and I could not identify
+  // them from the frame:
+  //   DeUwXJHtKiC  a Rock Hard Epoxy cap, "Is it too late to start an epoxy
+  //                business in 2026?"
+  //   DegaBUDtitE  "Customer says they're getting other quotes. Now what?"
+  // Add the guest first, then a row here.
 ];
 
 /** Approved guests only, in display order. */
