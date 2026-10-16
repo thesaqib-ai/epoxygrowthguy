@@ -75,9 +75,8 @@ export const guests: Guest[] = [
     slug: 'eagle-kianes',
     name: 'Eagle Kianes',
     business: 'Marbleous Creationz',
-    location: '',
-    // Confirm the handle before this goes live.
-    instagram: '',
+    location: 'California and Wisconsin',
+    instagram: 'marbleouscreationz_eagle',
     approved: true,
     order: 40,
   },
@@ -85,7 +84,9 @@ export const guests: Guest[] = [
     slug: 'lee-sartain',
     name: 'Lee Sartain',
     business: 'Ace High Concrete Supply',
-    location: '',
+    // Two branches, both in California. The card wants a place, not a
+    // trading address, so the street addresses stay off the page.
+    location: 'Rancho Cordova and Santa Clara, CA',
     instagram: 'acehighconcrete',
     approved: true,
     order: 50,
@@ -119,9 +120,9 @@ export const guests: Guest[] = [
   },
   {
     slug: 'lone-wolf-coatings',
-    name: '',
+    name: 'Stephon Fauntroy',
     business: 'Lone Wolf Coatings',
-    location: '',
+    location: 'Philadelphia and Delaware',
     instagram: 'lonewolfcoatings',
     approved: true,
     order: 120,
