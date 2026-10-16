@@ -91,15 +91,6 @@ export const guests: Guest[] = [
     order: 50,
   },
   {
-    slug: 'garage-style',
-    name: 'Garage Style',
-    business: 'Garage Style Ltd',
-    location: 'Hertfordshire, UK',
-    instagram: 'garagestyleltd',
-    approved: true,
-    order: 60,
-  },
-  {
     slug: 'danny-carpenter',
     name: 'Danny Carpenter',
     business: 'Mint Concrete Polishing',
@@ -125,24 +116,6 @@ export const guests: Guest[] = [
     instagram: 'jay_380_',
     approved: true,
     order: 90,
-  },
-  {
-    slug: 'superior-concrete-solutions',
-    name: '',
-    business: 'Superior Concrete Solutions',
-    location: 'Alabama and Florida',
-    instagram: '',
-    approved: true,
-    order: 100,
-  },
-  {
-    slug: 'smooth-coatings',
-    name: '',
-    business: 'Smooth Coatings',
-    location: 'Southwest Virginia',
-    instagram: 'smooth_coatings',
-    approved: true,
-    order: 110,
   },
   {
     slug: 'lone-wolf-coatings',
@@ -171,12 +144,6 @@ export const featuredReels: FeaturedReel[] = [
   {
     guestSlug: 'danny-carpenter',
     quote: 'Polished concrete taught me patience.',
-    url: 'https://www.instagram.com/epoxy_growth_guy/',
-    approved: false,
-  },
-  {
-    guestSlug: 'garage-style',
-    quote: 'One good garage brings the whole street.',
     url: 'https://www.instagram.com/epoxy_growth_guy/',
     approved: false,
   },
