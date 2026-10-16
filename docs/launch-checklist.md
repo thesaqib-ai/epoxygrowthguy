@@ -97,90 +97,44 @@ the file rather than in the dashboard.
 
 ---
 
-## C. Turn on email sending for autosinq.com
+## C. Get the Resend API key
 
-About 10 minutes, plus DNS propagation. **This is the step that can break
-things, so read it all before you start.**
+About 2 minutes. **No DNS to change.**
 
-The site sends from `muhammad.saqib@autosinq.com`, so the domain that needs
-onboarding is **autosinq.com**, not epoxygrowthguy.com. The sending domain
-follows the from address, not the website.
-
-### Why this one needs care
-
-autosinq.com already sends email. A domain is only allowed **one** SPF record.
-If onboarding leaves a second SPF record sitting next to the one that is
-already there, the standard says both become invalid, and every email
-autosinq.com sends starts failing SPF checks. Your quotes and invoices would
-start landing in spam, not just the two emails from this site.
-
-So you are going to run the command, then immediately check the DNS.
+Email goes through Resend, the same provider the Autosinq site uses. Cloudflare
+Email Sending was the first choice but it needs a paid Workers plan. Resend
+verifies a whole domain, autosinq.com is already verified there, and this site
+sends from `muhammad.saqib@autosinq.com`. So the verification is already done.
 
 ### Steps
 
-1. Before you change anything, record what is there now. Run:
+1. Open <https://resend.com/api-keys> and sign in with the account that has
+   autosinq.com on it.
+2. Either copy the existing key the Autosinq site uses, or click **Create API
+   Key**, name it `epoxygrowthguy`, give it **Sending access**, and copy the
+   value. It starts `re_`.
+3. Keep it for step E, where it becomes `RESEND_API_KEY`.
 
-   ```
-   ! npx wrangler email sending dns get autosinq.com
-   ```
+Alternatively, copy it from the Autosinq Pages project under **Settings** then
+**Environment variables**, if it is readable there.
 
-   If it errors saying the domain is not onboarded, that is expected at this
-   point. Instead open <https://dash.cloudflare.com>, select **autosinq.com**,
-   click **DNS** then **Records**, and filter to **TXT**. Find the record whose
-   content starts `v=spf1`. Copy that whole line into a note. You may need it
-   in step 4.
+4. Confirm the domain is verified. Open <https://resend.com/domains>.
 
-2. Onboard the domain:
+**You should see** `autosinq.com` listed as **Verified**. If it is not, stop
+and tell me, because nothing will send until it is.
 
-   ```
-   ! npx wrangler email sending enable autosinq.com
-   ```
+### Do not touch autosinq.com's DNS
 
-3. See what Cloudflare wants:
+Nothing in this project needs a DNS change, and two things would actively break
+if you made one:
 
-   ```
-   ! npx wrangler email sending dns get autosinq.com
-   ```
-
-4. Now go to <https://dash.cloudflare.com>, select **autosinq.com**, then
-   **DNS** > **Records**, and filter the type to **TXT**. Count the records
-   whose content starts with `v=spf1`.
-
-   - **If there is exactly one**, you are done with this step. Go to step 5.
-   - **If there are two**, you must merge them:
-     a. Look at the new record Cloudflare added. Copy the `include:` part out
-        of it, for example `include:_spf.mx.cloudflare.net`. Use the exact text
-        from your screen, do not type it from memory or from this document.
-     b. Click **Edit** on your original SPF record, the one from your note in
-        step 1.
-     c. Paste that `include:` into it, just before the final `~all` or `-all`,
-        separated by a single space. The result looks like
-        `v=spf1 include:_spf.google.com include:_spf.mx.cloudflare.net ~all`.
-     d. Click **Save**.
-     e. Delete the SPF record Cloudflare created, so only the merged one
-        remains.
-
-   DKIM needs no attention. It uses its own selector subdomain, so the new
-   record cannot collide with anything already there.
-
-5. Wait 15 minutes, then confirm:
-
-   ```
-   ! npx wrangler email sending dns get autosinq.com
-   ```
-
-**You should see** every record reported as found or verified.
-
-6. If autosinq.com has a DMARC record set to `p=quarantine` or `p=reject`, send
-   yourself a real test before the form goes live. The quickest way:
-
-   ```
-   ! npx wrangler email sending send --from "muhammad.saqib@autosinq.com" --to "YOUR-PERSONAL-INBOX" --subject "Test" --text "Checking deliverability."
-   ```
-
-**You should see** that message arrive in your inbox, not your spam folder. If
-it lands in spam, do not launch yet. A guest whose confirmation goes to spam is
-a guest who thinks you ignored them.
+- **Never enable Cloudflare Email Routing on autosinq.com.** It replaces the MX
+  records, which point at `mx1.hostinger.com` and `mx2.hostinger.com`, and that
+  would silently kill the `muhammad.saqib@autosinq.com` mailbox.
+- **Never merge the two SPF records.** `autosinq.com` carries the Hostinger
+  include for the mailboxes, `send.autosinq.com` carries the Amazon SES include
+  for Resend's sending path. They are on different hostnames, so both are
+  valid. Merging them would break one.
 
 ---
 
@@ -243,6 +197,7 @@ About 5 minutes.
    | `TURNSTILE_SECRET_KEY` | your Turnstile secret key | **encrypt** |
    | `SUPABASE_URL` | the project URL from step A8 | plain text |
    | `SUPABASE_SERVICE_ROLE_KEY` | the service role key from step A9 | **encrypt** |
+   | `RESEND_API_KEY` | the key from step C, starts `re_` | **encrypt** |
    | `NOTIFY_EMAIL` | your personal inbox, the gmail one | **encrypt** |
 
    `YOUR-PERSONAL-INBOX` is written out rather than spelled in this file
@@ -368,9 +323,13 @@ SQL in step A never ran.
 
 **The row saves but no email arrives.**
 Sending is not working but the site is fine, which is exactly how it was
-designed to fail. Check the Functions logs for a line starting `Email failed`.
-`E_SENDER_NOT_VERIFIED` means step C did not complete. Nothing is lost either
-way, the requests are all in Supabase.
+designed to fail. Check the Functions logs for a line starting `Email send
+failed`. Resend says why in plain words in that line: "domain is not verified"
+means autosinq.com needs checking at <https://resend.com/domains>, and a 401
+means the key is wrong. A line saying `RESEND_API_KEY is EMPTY` means the
+secret was uploaded as a blank string, so set it again through the dashboard
+rather than a script. Nothing is lost either way, the requests are all in
+Supabase.
 
 **A guest's card looks half empty.**
 That guest is missing details in `src/data/guests.ts`. Blank fields render as

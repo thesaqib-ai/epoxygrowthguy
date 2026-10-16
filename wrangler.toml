@@ -13,15 +13,10 @@ binding = "RATE_LIMIT"
 id = "5c47723a5d154832a74974e8e7ac9857"
 preview_id = "beabed8aaca24464b80a37fdc25b70d0"
 
-# Transactional email, sent straight from the Pages Function.
-# The sending domain is autosinq.com, not epoxygrowthguy.com, because that is
-# where the from address lives. Onboard it first:
-#   npx wrangler email sending enable autosinq.com
-# Read docs/emails.md before running that, autosinq.com already sends mail and
-# a second SPF record would break it.
-[[send_email]]
-name = "EMAIL"
-allowed_sender_addresses = ["muhammad.saqib@autosinq.com"]
+# Email goes through Resend, not a Cloudflare binding. Cloudflare Email
+# Sending is gated behind a paid Workers plan, and autosinq.com is already a
+# verified sending domain on Resend for the Autosinq site, so there is no
+# binding here and no DNS to change. The key is the RESEND_API_KEY secret.
 
 [vars]
 # "supabase" (default) or "airtable". See src/lib/store.ts.
@@ -31,6 +26,7 @@ STORE_TARGET = "supabase"
 #   TURNSTILE_SECRET_KEY
 #   SUPABASE_URL
 #   SUPABASE_SERVICE_ROLE_KEY
+#   RESEND_API_KEY            the same key the Autosinq site uses
 #   NOTIFY_EMAIL              where the heads up lands
 # PUBLIC_TURNSTILE_SITE_KEY is a build time variable, set it in the Pages
 # build settings so Astro can read it.

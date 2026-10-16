@@ -119,17 +119,14 @@ for when you already know the shape of it.
    | `TURNSTILE_SECRET_KEY` | secret | |
    | `SUPABASE_URL` | secret | |
    | `SUPABASE_SERVICE_ROLE_KEY` | secret | never goes near the browser |
+   | `RESEND_API_KEY` | secret | same key as the Autosinq site |
    | `NOTIFY_EMAIL` | secret | where the heads up lands, keeps a personal inbox out of the repo |
    | `STORE_TARGET` | plain | `supabase` or `airtable` |
 
-4. Turn on email sending, once. The domain is **autosinq.com**, because that is
-   where the from address lives:
-   ```bash
-   npx wrangler email sending enable autosinq.com
-   ```
-   **Read `docs/emails.md` first.** autosinq.com already sends mail, and a
-   second SPF record alongside the existing one would break it. Nothing sends
-   until this is done.
+4. Add `RESEND_API_KEY`, the same key the Autosinq site uses. Email goes
+   through Resend because Cloudflare Email Sending needs a paid Workers plan,
+   and autosinq.com is already a verified sending domain there, so there is no
+   DNS to change. See `docs/emails.md`.
 5. Add `epoxygrowthguy.com` as a custom domain, and `www.epoxygrowthguy.com`
    too. HTTPS is forced by Cloudflare.
 6. Send `www` to the apex with a Redirect Rule on the zone

@@ -1,23 +1,38 @@
 /**
  * The two emails that go out when a request comes in:
  *
- *   1. A heads up to Saqib, with reply-to set to the person who asked, so
- *      hitting reply in any mail client goes straight back to them.
+ *   1. A heads up to Saqib, with Reply-To set to the person who asked, so
+ *      hitting reply on a phone answers them rather than an unattended address.
  *   2. A short "got it" to the person who asked.
  *
- * Both are sent through the Cloudflare Email Sending binding, so there are no
- * API keys to manage. Neither can block the response: they run after the row
- * is already saved, and every failure is caught and logged.
+ * VIA RESEND, NOT CLOUDFLARE EMAIL SENDING. The binding needed no credential
+ * and was the first choice, but it is gated behind a paid Workers plan.
+ * autosinq.com is already a verified sending domain on Resend for the Autosinq
+ * site, so this reuses that: same provider, same verified domain, no new DNS.
+ * Resend's free tier is 3,000 a month and 100 a day, shared across both sites
+ * and far beyond what either needs. See Autosinq's src/lib/email.ts, which this
+ * deliberately mirrors.
+ *
+ * THE GOVERNING RULE: AN EMAIL FAILURE MUST NEVER COST A REQUEST.
+ *
+ * The row is in Supabase before any of this runs, and this whole module is
+ * called inside waitUntil, after the response has already gone back to the
+ * browser. Nothing here is allowed to throw. Every failure becomes a
+ * console.error and a `false`. A missed notification is an annoyance that
+ * Supabase still has a record of; a 500 on the form is a lost guest.
  */
 import type { RequestPayload } from './form-schema';
 import { site } from '../config';
 
+const ENDPOINT = 'https://api.resend.com/emails';
+
 export type MailEnv = {
-  EMAIL?: SendEmail;
+  RESEND_API_KEY?: string;
   /** Where the heads up goes. Falls back to the site contact address. */
   NOTIFY_EMAIL?: string;
 };
 
+/** Escapes anything a stranger typed before it goes near an HTML body. */
 const esc = (value: string): string =>
   value
     .replace(/&/g, '&amp;')
@@ -28,13 +43,71 @@ const esc = (value: string): string =>
 const firstName = (fullName: string): string =>
   fullName.trim().split(/\s+/)[0] || 'there';
 
-/** The request, laid out as label and value pairs, blanks dropped. */
+/** Resend takes one RFC 5322 string rather than a name and address pair. */
+const FROM = `${site.mail.fromName} <${site.mail.from}>`;
+
+type Message = {
+  to: string;
+  reply_to?: string;
+  subject: string;
+  text: string;
+  html: string;
+};
+
+async function deliver(
+  apiKey: string | undefined,
+  what: string,
+  message: Message,
+): Promise<boolean> {
+  if (!apiKey) {
+    /**
+     * EMPTY and MISSING are reported separately on purpose.
+     *
+     * `wrangler secret put NAME` prompts on stdin. Run from a non-interactive
+     * shell it reads EOF, uploads an empty string, and still prints "Success".
+     * The secret list then looks perfect while every send fails. Set this one
+     * through the dashboard.
+     */
+    console.error(
+      `RESEND_API_KEY ${apiKey === '' ? 'is EMPTY (set it in the dashboard, not a non-interactive shell)' : 'is not set'}, ${what} not sent`,
+    );
+    return false;
+  }
+
+  try {
+    const response = await fetch(ENDPOINT, {
+      method: 'POST',
+      headers: {
+        authorization: `Bearer ${apiKey}`,
+        'content-type': 'application/json',
+      },
+      body: JSON.stringify({ from: FROM, ...message }),
+    });
+
+    if (response.ok) return true;
+
+    // Resend explains refusals in plain words ("domain is not verified", "you
+    // can only send to your own address on a free account"). That sentence is
+    // the difference between a five minute fix and an afternoon, so never
+    // swallow it.
+    const detail = await response.text().catch(() => '');
+    console.error(
+      `Email send failed, ${what}, HTTP ${response.status}: ${detail.slice(0, 500)}`,
+    );
+    return false;
+  } catch (error) {
+    console.error(`Email send threw, ${what}:`, error);
+    return false;
+  }
+}
+
+/** The request as label and value pairs, with blanks dropped. */
 const fields = (data: RequestPayload): Array<[string, string]> =>
   (
     [
       ['Name', data.full_name],
       ['Business', data.business_name],
-      ['Instagram', `@${data.instagram}`],
+      ['Instagram', data.instagram ? `@${data.instagram}` : ''],
       ['Website', data.website],
       ['Email', data.email],
       ['Phone', data.phone],
@@ -50,9 +123,18 @@ const fields = (data: RequestPayload): Array<[string, string]> =>
       ['Campaign name', data.utm_campaign],
       ['Came from', data.referrer],
     ] as Array<[string, string]>
-  ).filter(([, value]) => value !== '' && value !== '@');
+  ).filter(([, value]) => value !== '');
 
-function notifyEmail(data: RequestPayload, recordId: string | null) {
+/**
+ * The one that matters. Reply-To is the requester, so answering from a phone
+ * goes straight to them with no copy and paste.
+ */
+async function notifyOwner(
+  apiKey: string | undefined,
+  data: RequestPayload,
+  to: string,
+  recordId: string | null,
+): Promise<boolean> {
   const rows = fields(data);
 
   const text = [
@@ -60,59 +142,65 @@ function notifyEmail(data: RequestPayload, recordId: string | null) {
     '',
     ...rows.map(([label, value]) => `${label}: ${value}`),
     '',
-    // Spread rather than filter, so the blank spacer lines above survive.
     ...(recordId ? [`Row: ${recordId}`, ''] : []),
     'Reply to this email to answer them directly.',
   ].join('\n');
 
-  const html = `<div style="font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif;font-size:15px;line-height:1.6;color:#111">
-  <p style="margin:0 0 16px"><strong>New interview request.</strong></p>
-  <table cellpadding="0" cellspacing="0" style="border-collapse:collapse">
-    ${rows
-      .map(
-        ([label, value]) =>
-          `<tr><td style="padding:4px 16px 4px 0;color:#666;vertical-align:top;white-space:nowrap">${esc(label)}</td><td style="padding:4px 0;vertical-align:top">${esc(value)}</td></tr>`,
-      )
-      .join('\n    ')}
-  </table>
-  ${recordId ? `<p style="margin:16px 0 0;color:#888;font-size:13px">Row ${esc(recordId)}</p>` : ''}
-  <p style="margin:16px 0 0;color:#666;font-size:13px">Reply to this email to answer them directly.</p>
+  const html = `<div style="font:15px/1.6 -apple-system,Segoe UI,Roboto,sans-serif">
+<p style="margin:0 0 16px"><strong>New interview request.</strong></p>
+<table cellpadding="6" style="border-collapse:collapse">
+${rows
+  .map(
+    ([label, value]) =>
+      `<tr><td style="color:#666;white-space:nowrap;vertical-align:top">${esc(label)}</td><td style="vertical-align:top"><strong>${esc(value)}</strong></td></tr>`,
+  )
+  .join('\n')}
+</table>
+${recordId ? `<p style="margin:16px 0 0;color:#888;font-size:13px">Row ${esc(recordId)}</p>` : ''}
+<p style="margin:16px 0 0;color:#666;font-size:13px">Reply to this email to answer them directly.</p>
 </div>`;
 
-  return {
+  return deliver(apiKey, 'interview request notification', {
+    to,
+    reply_to: data.email,
     subject: `Interview request: ${data.full_name}, ${data.business_name}`,
     text,
     html,
-  };
+  });
 }
 
-function autoReplyEmail(data: RequestPayload) {
+/** The short "got it", so nobody is left wondering whether it sent. */
+async function autoReply(
+  apiKey: string | undefined,
+  data: RequestPayload,
+): Promise<boolean> {
   const name = firstName(data.full_name);
 
-  const lines = [
-    `Hi ${name},`,
-    '',
-    "Thanks for reaching out about the Epoxy Growth Sessions. I've got your details and I'll look through them in the next 48 hours.",
-    '',
-    "If it's a fit, I'll send you a link to pick a time. The call is relaxed, about 15 to 20 minutes, and I'll send you the questions before we record.",
-    '',
-    'Talk soon,',
-    site.hostName,
-    `@${site.instagramHandle}`,
-  ];
+  const text = `Hi ${name},
 
-  const html = `<div style="font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif;font-size:15px;line-height:1.6;color:#111">
-  <p style="margin:0 0 16px">Hi ${esc(name)},</p>
-  <p style="margin:0 0 16px">Thanks for reaching out about the Epoxy Growth Sessions. I've got your details and I'll look through them in the next 48 hours.</p>
-  <p style="margin:0 0 16px">If it's a fit, I'll send you a link to pick a time. The call is relaxed, about 15 to 20 minutes, and I'll send you the questions before we record.</p>
-  <p style="margin:0">Talk soon,<br />${esc(site.hostName)}<br /><a href="https://www.instagram.com/${esc(site.instagramHandle)}/" style="color:#9a7520">@${esc(site.instagramHandle)}</a></p>
+Thanks for reaching out about the Epoxy Growth Sessions. I've got your details and I'll look through them in the next 48 hours.
+
+If it's a fit, I'll send you a link to pick a time. The call is relaxed, about 15 to 20 minutes, and I'll send you the questions before we record.
+
+Talk soon,
+${site.hostName}
+@${site.instagramHandle}`;
+
+  const html = `<div style="font:15px/1.6 -apple-system,Segoe UI,Roboto,sans-serif;max-width:34rem">
+<p>Hi ${esc(name)},</p>
+<p>Thanks for reaching out about the Epoxy Growth Sessions. I've got your details and I'll look through them in the next 48 hours.</p>
+<p>If it's a fit, I'll send you a link to pick a time. The call is relaxed, about 15 to 20 minutes, and I'll send you the questions before we record.</p>
+<p>Talk soon,<br />${esc(site.hostName)}<br /><a href="https://www.instagram.com/${esc(site.instagramHandle)}/" style="color:#9a7520">@${esc(site.instagramHandle)}</a></p>
 </div>`;
 
-  return {
+  return deliver(apiKey, 'requester auto reply', {
+    to: data.email,
+    // A reply here is a real person asking about the series. Route it to Saqib.
+    reply_to: site.contactEmail,
     subject: 'Got your interview request',
-    text: lines.join('\n'),
+    text,
     html,
-  };
+  });
 }
 
 export async function sendNotifications(
@@ -120,40 +208,14 @@ export async function sendNotifications(
   env: MailEnv,
   recordId: string | null,
 ): Promise<void> {
-  if (!env.EMAIL) {
-    console.warn('No EMAIL binding, skipping both emails.');
-    return;
-  }
-
-  const from = { email: site.mail.from, name: site.mail.fromName };
-  const notify = notifyEmail(data, recordId);
-  const reply = autoReplyEmail(data);
-
-  const results = await Promise.allSettled([
-    env.EMAIL.send({
-      to: env.NOTIFY_EMAIL || site.contactEmail,
-      from,
-      // So a reply from the phone goes straight to the person who asked.
-      replyTo: data.email,
-      subject: notify.subject,
-      text: notify.text,
-      html: notify.html,
-    }),
-    env.EMAIL.send({
-      to: data.email,
-      from,
-      replyTo: site.contactEmail,
-      subject: reply.subject,
-      text: reply.text,
-      html: reply.html,
-    }),
+  // Neither call rejects, so this cannot throw into waitUntil.
+  await Promise.all([
+    notifyOwner(
+      env.RESEND_API_KEY,
+      data,
+      env.NOTIFY_EMAIL || site.contactEmail,
+      recordId,
+    ),
+    autoReply(env.RESEND_API_KEY, data),
   ]);
-
-  const labels = ['heads up to Saqib', 'auto reply to the requester'];
-  results.forEach((result, i) => {
-    if (result.status === 'rejected') {
-      // The row is already saved, so this never reaches the person.
-      console.error(`Email failed (${labels[i]})`, result.reason);
-    }
-  });
 }

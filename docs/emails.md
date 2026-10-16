@@ -1,8 +1,19 @@
 # The two emails
 
-Both are sent from `src/lib/notify.ts` through the Cloudflare Email Sending
-binding, straight from the Pages Function. There is no n8n, no Zapier and no
-email API key to rotate.
+Both are sent from `src/lib/notify.ts` through Resend's REST API, straight from
+the Pages Function. There is no n8n and no Zapier.
+
+**Why Resend and not Cloudflare Email Sending.** The Cloudflare binding needed
+no credential at all and was the first choice, but it is gated behind a paid
+Workers plan. The Autosinq site hit exactly the same wall and moved to Resend,
+and autosinq.com is already a verified sending domain there. Since this site
+sends from `muhammad.saqib@autosinq.com`, it can reuse that verification: same
+provider, same domain, same API key, **no DNS changes at all**. Autosinq's
+`src/lib/email.ts` is the sibling of this module and they are deliberately
+alike.
+
+Free tier is 3,000 emails a month and 100 a day, shared across both sites. This
+form would have to go properly viral to notice.
 
 They go out after the row is saved and after the response has gone back to the
 browser, so a mail outage can never turn a good request into an error on
@@ -48,75 +59,72 @@ out of spam folders.
 
 ## Setup
 
+One secret, no DNS.
+
 The `from` address is `muhammad.saqib@autosinq.com`, set in `src/config.ts`.
-So the domain to onboard is **autosinq.com**, not epoxygrowthguy.com. The
-sending domain follows the from address, not the website.
+Resend verifies a whole **domain**, not individual addresses, and autosinq.com
+is already verified from the Autosinq site. So any address on that domain can
+send, and there is nothing to add to DNS for this project.
 
-### Read this before onboarding
+1. Get the key. Either copy `RESEND_API_KEY` from the Autosinq Pages project,
+   or open <https://resend.com/api-keys> and create one with **Sending access**.
+2. In the epoxygrowthguy Pages project go to **Settings**, then **Environment
+   variables**, add `RESEND_API_KEY` under Production, and click **Encrypt**
+   before saving.
+3. Redeploy. Variables only reach builds that run after they are set.
 
-autosinq.com already sends email. That makes this different from onboarding a
-fresh domain, and getting it wrong damages mail you already rely on.
+### Set it in the dashboard, not from a script
 
-**A domain can only have one SPF record.** autosinq.com almost certainly has
-one already, put there by whoever hosts the mailbox. If a second SPF TXT record
-appears alongside it, the standard says both are invalid, and every email
-autosinq.com sends starts failing SPF. Quotes and invoices land in spam, not
-just these two emails.
+`wrangler secret put RESEND_API_KEY` reads the value from stdin. Run from a
+non-interactive shell it reads EOF, uploads an **empty string**, and still
+prints "Success". The secret list then looks perfect while every send fails.
+The code tells empty and missing apart in its logs for exactly this reason, but
+using the dashboard avoids the trap entirely.
 
-So do not blindly accept an added record. Do this instead:
+### What must never happen to autosinq.com
 
-```bash
-npx wrangler email sending enable autosinq.com
-npx wrangler email sending dns get autosinq.com
-```
+Do not enable Cloudflare Email **Routing** on autosinq.com. It replaces the MX
+records, which currently point at `mx1.hostinger.com` and `mx2.hostinger.com`,
+and that would silently kill the `muhammad.saqib@autosinq.com` mailbox. Nothing
+in this project needs it.
 
-Then open the DNS tab for autosinq.com and check the TXT records:
+The two existing SPF records are both correct and must be left alone:
 
-- **If there is now one SPF record,** nothing to do.
-- **If there are two,** merge them. Take the `include:` value that Cloudflare
-  added, paste it into the SPF record that was already there, and delete the
-  one Cloudflare created. One record, both includes, for example
-  `v=spf1 include:_spf.google.com include:<whatever Cloudflare listed> ~all`.
-  Use the exact value from `dns get`, do not type it from memory.
+| Name | Content | What it is |
+|---|---|---|
+| `autosinq.com` | `v=spf1 include:_spf.mail.hostinger.com ~all` | the mailboxes |
+| `send.autosinq.com` | `v=spf1 include:amazonses.com ~all` | Resend's sending path |
 
-DKIM is safe either way. It uses its own selector subdomain, so the new record
-cannot collide with an existing one.
-
-If autosinq.com has a DMARC record set to `quarantine` or `reject`, wait for
-DNS to settle before the form goes live. Send a test to yourself first. A guest
-whose confirmation lands in spam is a guest who thinks you ignored them.
-
-### Verifying
-
-```bash
-npx wrangler email sending dns get autosinq.com
-```
-
-Sending from a domain you have not onboarded is rejected with
-`E_SENDER_NOT_VERIFIED`, which is the whole point of DKIM.
+Two SPF records only conflict when they sit on the **same** hostname. These are
+on different names, so both are valid. Merging them would break one.
 
 ### Receiving
 
-Nothing to set up. `muhammad.saqib@autosinq.com` is already a real mailbox, so
-replies to the auto reply and anything sent to the address in the footer land
-where you already read mail.
+Nothing to set up. `muhammad.saqib@autosinq.com` is a real Hostinger mailbox,
+so replies to the auto reply, and anything sent to the address in the footer,
+land where mail is already read.
 
 ## Testing before launch
 
-`wrangler pages dev` does not send real mail. It writes each message to
-`.wrangler/tmp/email/` instead, which is useful for reading exactly what would
-have gone out.
+`wrangler pages dev` sends for real, because Resend is just an HTTPS call. Put
+`RESEND_API_KEY` in `.dev.vars` and submit the form at
+`http://127.0.0.1:8788`.
 
-To send for real, temporarily add `remote = true` under `[[send_email]]` in
-`wrangler.toml`, submit the form at `http://127.0.0.1:8788` using addresses you
-control, then take it out again before deploying.
+Use addresses you control. Bounces from made up addresses count against sender
+reputation, so never test with `test@test.com`.
 
-Bounces from made up addresses count against your sender reputation, so do not
-test with `test@test.com`.
+With no key set nothing sends, the request still saves, and the log says
+whether the key was missing or empty.
+
+## Swapping provider later
+
+`deliver()` in `src/lib/notify.ts` is the only Resend specific function. The
+two messages above it are provider agnostic. Changing provider means rewriting
+that one function.
 
 ## If you ever want n8n back
 
-The earlier build posted the payload to an n8n webhook instead. Everything that
-needs changing lives in `src/lib/notify.ts` and the one `waitUntil` call in
-`functions/api/request.ts`. Nothing else in the app knows how a request gets
-announced.
+An earlier build posted the payload to an n8n webhook instead. Everything that
+would need changing lives in `src/lib/notify.ts` and the single `waitUntil`
+call in `functions/api/request.ts`. Nothing else in the app knows how a request
+gets announced.
