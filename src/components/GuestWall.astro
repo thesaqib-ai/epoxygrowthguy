@@ -1,10 +1,32 @@
 ---
 import Section from './Section.astro';
 import GuestCard from './GuestCard.astro';
-import { approvedGuests } from '../data/guests';
+import { approvedGuests, guests } from '../data/guests';
 import { site } from '../config';
 
 const list = approvedGuests();
+
+/**
+ * Shout during the build about any photo that will never be used.
+ *
+ * A file named after the Instagram handle instead of the slug matches nothing,
+ * and the card quietly falls back to initials. That looks like "the photo did
+ * not work" with no clue why, so name the orphans out loud instead.
+ */
+const photoFiles = Object.keys(
+  import.meta.glob('/src/assets/guests/*.{jpeg,jpg,png,webp,avif}'),
+).map((path) => path.split('/').pop()!.replace(/\.[^.]+$/, ''));
+
+const slugs = new Set(guests.map((g) => g.slug));
+const orphans = photoFiles.filter((name) => !slugs.has(name));
+
+if (orphans.length > 0) {
+  console.warn(
+    `\n[guests] ${orphans.length} photo(s) in src/assets/guests/ match no guest slug and will be ignored:\n` +
+      orphans.map((name) => `  - ${name}`).join('\n') +
+      `\n  Rename each one to its slug. Current slugs: ${[...slugs].join(', ')}\n`,
+  );
+}
 
 // A thin grid looks worse than no grid, so the whole section stays hidden
 // until enough guests have confirmed.

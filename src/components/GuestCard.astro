@@ -24,6 +24,14 @@ const key = guest.photo ? `/src/assets/guests/${guest.photo}` : bySlug;
 const loader = key ? photos[key] : undefined;
 const photo = loader ? (await loader()).default : undefined;
 
+/**
+ * The circle is 80px on a phone and 96px on desktop, so 192 is a true 2x for
+ * the largest case. Capped at the source width, because an Instagram profile
+ * picture is often only 150px and upscaling it would just be a bigger, softer
+ * file. Drop in a larger original and this picks it up with no change here.
+ */
+const renderWidth = photo ? Math.min(192, photo.width) : 0;
+
 // Fall back to clean initials when there is no photo.
 const label = guest.name || guest.business;
 const initials = label
@@ -43,9 +51,9 @@ const initials = label
       <Image
         src={photo}
         alt={label}
-        width={160}
-        height={160}
-        densities={[1, 2]}
+        width={renderWidth}
+        height={renderWidth}
+        densities={[1]}
         format="avif"
         loading="lazy"
         decoding="async"
