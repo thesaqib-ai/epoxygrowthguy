@@ -7,13 +7,21 @@ type Props = { guest: Guest; index?: number };
 
 const { guest, index = 0 } = Astro.props;
 
-// Photos are optimized at build time. Drop a square image into
-// src/assets/guests/ and point `photo` at the file name.
+// Photos are optimized at build time. Drop a square image named after the
+// guest slug into src/assets/guests/ and it is picked up on the next build,
+// whatever the extension. Setting `photo` explicitly overrides that, for the
+// odd file that cannot be renamed.
 const photos = import.meta.glob<{ default: ImageMetadata }>(
   '/src/assets/guests/*.{jpeg,jpg,png,webp,avif}',
 );
-const key = guest.photo ? `/src/assets/guests/${guest.photo}` : '';
-const loader = key && photos[key] ? photos[key] : undefined;
+
+const bySlug = Object.keys(photos).find((path) => {
+  const base = path.split('/').pop()?.replace(/\.[^.]+$/, '');
+  return base === guest.slug;
+});
+
+const key = guest.photo ? `/src/assets/guests/${guest.photo}` : bySlug;
+const loader = key ? photos[key] : undefined;
 const photo = loader ? (await loader()).default : undefined;
 
 // Fall back to clean initials when there is no photo.

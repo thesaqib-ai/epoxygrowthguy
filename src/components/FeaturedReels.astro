@@ -13,8 +13,16 @@ const thumbs = import.meta.glob<{ default: ImageMetadata }>(
 
 const cards = await Promise.all(
   reels.map(async (reel) => {
-    const key = `/src/assets/reels/${reel.thumbnail}`;
-    const loader = thumbs[key];
+    // Same as guest photos: a file named after the guest slug is found on its
+    // own, and setting `thumbnail` explicitly overrides that.
+    const bySlug = Object.keys(thumbs).find((path) => {
+      const base = path.split('/').pop()?.replace(/\.[^.]+$/, '');
+      return base === reel.guestSlug;
+    });
+    const key = reel.thumbnail
+      ? `/src/assets/reels/${reel.thumbnail}`
+      : bySlug;
+    const loader = key ? thumbs[key] : undefined;
     return { reel, image: loader ? (await loader()).default : undefined };
   }),
 );

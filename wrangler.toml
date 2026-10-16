@@ -10,8 +10,8 @@ compatibility_flags = ["nodejs_compat"]
 # then paste the ids below.
 [[kv_namespaces]]
 binding = "RATE_LIMIT"
-id = "replace-with-your-kv-namespace-id"
-preview_id = "replace-with-your-preview-kv-namespace-id"
+id = "5c47723a5d154832a74974e8e7ac9857"
+preview_id = "beabed8aaca24464b80a37fdc25b70d0"
 
 # Transactional email, sent straight from the Pages Function.
 # The sending domain is autosinq.com, not epoxygrowthguy.com, because that is

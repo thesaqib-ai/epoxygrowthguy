@@ -1,12 +1,13 @@
 /**
  * All guest and reel content lives here.
  *
- * To add a guest: add a row, drop a square photo in src/assets/guests/
- * named after the slug (for example chris-land.jpg) and set `photo` to that
- * file name. To show a guest: set `approved: true`.
+ * To add a guest: add a row, then drop a square photo into src/assets/guests/
+ * named after the slug, for example christopher-land.jpg. It is picked up on
+ * the next build on its own. To show a guest: set `approved: true`.
  *
  * Anything not yet confirmed stays an empty string. Empty values render
- * nothing at all.
+ * nothing at all, so a half filled row makes a shorter card, never a broken
+ * one.
  */
 
 export type Guest = {
@@ -16,7 +17,10 @@ export type Guest = {
   location: string;
   /** Handle without the @. Empty string if not confirmed yet. */
   instagram: string;
-  /** File name inside src/assets/guests/, for example "chris-land.jpg". */
+  /**
+   * Usually leave this out. Any image in src/assets/guests/ named after the
+   * slug is found automatically. Only set it when a file cannot be renamed.
+   */
   photo?: string;
   /** Only approved guests are ever shown. */
   approved: boolean;
@@ -26,11 +30,15 @@ export type Guest = {
 
 export type FeaturedReel = {
   guestSlug: string;
-  /** One short line. */
+  /** One short line, in the guest's own words. Never invented. */
   quote: string;
-  /** File name inside src/assets/reels/, for example "chris-land.jpg". */
-  thumbnail: string;
-  /** Instagram reel URL. */
+  /**
+   * Usually leave this out. Any image in src/assets/reels/ named after the
+   * guest slug is found automatically. Only set it when a file cannot be
+   * renamed.
+   */
+  thumbnail?: string;
+  /** The real Instagram reel URL, not the profile. */
   url: string;
   approved: boolean;
 };
@@ -151,28 +159,24 @@ export const featuredReels: FeaturedReel[] = [
   {
     guestSlug: 'christopher-land',
     quote: 'We stopped chasing cheap jobs and the business got easier.',
-    thumbnail: 'christopher-land.jpg',
     url: 'https://www.instagram.com/epoxy_growth_guy/',
     approved: false,
   },
   {
     guestSlug: 'don-resin',
     quote: 'Art first, then the floors followed.',
-    thumbnail: 'don-resin.jpg',
     url: 'https://www.instagram.com/epoxy_growth_guy/',
     approved: false,
   },
   {
     guestSlug: 'danny-carpenter',
     quote: 'Polished concrete taught me patience.',
-    thumbnail: 'danny-carpenter.jpg',
     url: 'https://www.instagram.com/epoxy_growth_guy/',
     approved: false,
   },
   {
     guestSlug: 'garage-style',
     quote: 'One good garage brings the whole street.',
-    thumbnail: 'garage-style.jpg',
     url: 'https://www.instagram.com/epoxy_growth_guy/',
     approved: false,
   },
