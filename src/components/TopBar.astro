@@ -2,20 +2,27 @@
 import { site } from '../config';
 ---
 
-<header
-  class="sticky top-0 z-40 border-b border-white/5 bg-ink-950/70 backdrop-blur-md"
->
-  <div class="wrap flex h-16 items-center justify-between gap-4">
-    <a
-      href="/"
-      class="font-display text-lg tracking-wide text-paper sm:text-xl"
-      aria-label={`${site.wordmark}, home`}
-    >
-      {site.wordmark}
-    </a>
+<header class="sticky top-0 z-40">
+  <!--
+    A red edge pinned to the very top. The kit opens every section with a red
+    dash, and the page itself had nothing: a dark bar on a dark page, with no
+    brand in the first thing anyone sees.
+  -->
+  <div class="h-[3px] w-full bg-accent"></div>
 
-    <a href="#request" class="btn btn-primary btn-sm">
-      Request an interview
-    </a>
+  <div class="border-b border-white/5 bg-ink-950/70 backdrop-blur-md">
+    <div class="wrap flex h-16 items-center justify-between gap-4">
+      <a
+        href="/"
+        class="font-display text-lg tracking-wide text-paper sm:text-xl"
+        aria-label={`${site.wordmark}, home`}
+      >
+        {site.wordmark}
+      </a>
+
+      <a href="#request" class="btn btn-primary btn-sm">
+        Request an interview
+      </a>
+    </div>
   </div>
 </header>

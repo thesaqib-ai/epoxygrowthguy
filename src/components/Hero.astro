@@ -5,16 +5,28 @@ import reelWall from '../assets/hero/reel-wall.png';
 ---
 
 <section class="relative overflow-hidden">
-  <!-- Faint metallic swirl behind the hero. Pure CSS, so there is no extra
-       request, and it sits far below text contrast. -->
+  <!--
+    Lighting, all CSS, so there is no extra request and nothing to load.
+
+    The previous glow sat at -right-1/4 -top-1/3 at 13% and was effectively
+    invisible: on a wide screen it fell off the edge behind the reel wall,
+    leaving the headline on flat black. These two are placed to light the
+    content rather than the margin.
+
+    Still one colour. The second is plain white, which is light rather than a
+    third hue, so the kit's "never 3+ colours" rule holds.
+  -->
   <div class="pointer-events-none absolute inset-0 -z-10" aria-hidden="true">
-    <!--
-      One red glow, not two colours. The kit's "never 3+ colours" rule applies
-      to the backdrop as much as the type, so the old purple is gone.
-    -->
+    <!-- Red spill from behind the reel wall, reaching across the headline. -->
     <div
-      class="absolute -right-1/4 -top-1/3 h-[46rem] w-[46rem] rounded-full opacity-[0.13] blur-3xl"
-      style="background: radial-gradient(closest-side, #FF0033, transparent 70%)"
+      class="absolute -top-[30%] right-[-12%] h-[58rem] w-[58rem] rounded-full opacity-[0.22] blur-[130px]"
+      style="background: radial-gradient(closest-side, #FF0033, transparent 72%)"
+    >
+    </div>
+    <!-- A soft lift top left, so the first thing read is not sitting on nothing. -->
+    <div
+      class="absolute -left-[12%] -top-[28%] h-[42rem] w-[42rem] rounded-full opacity-[0.07] blur-[110px]"
+      style="background: radial-gradient(closest-side, #FFFFFF, transparent 70%)"
     >
     </div>
     <div
@@ -24,10 +36,22 @@ import reelWall from '../assets/hero/reel-wall.png';
     </div>
   </div>
 
-  <div class="wrap py-section">
+  <!--
+    Less padding at the top than the shared rhythm gives. The hero follows the
+    nav rather than another section, so it does not need clearance from one,
+    and the gap under the bar was reading as a void.
+  -->
+  <div class="wrap pb-section pt-8 sm:pt-10">
     <div class="grid gap-10 lg:grid-cols-[1fr_380px] lg:items-center lg:gap-14">
       <div class="reveal">
-        <p class="eyebrow">{site.seriesName}</p>
+        <!--
+          The kit prefixes its eyebrow with a short red dash. It also puts a
+          red mark on the left, which is the side that had nothing on it.
+        -->
+        <p class="eyebrow flex items-center gap-3">
+          <span class="h-[2px] w-8 shrink-0 bg-accent"></span>
+          {site.seriesName}
+        </p>
 
         <!--
           The kit's core move: white headline, one red keyword. The copy is
