@@ -110,15 +110,6 @@ export const guests: Guest[] = [
     order: 70,
   },
   {
-    slug: 'sez',
-    name: 'Sez',
-    business: 'N&A Epoxy Flooring',
-    location: 'Sydney, Australia',
-    instagram: 'na_epoxy_floors',
-    approved: true,
-    order: 80,
-  },
-  {
     slug: 'jay',
     name: 'Jay',
     business: 'Limitless Epoxy Designs',
@@ -143,10 +134,9 @@ export const guests: Guest[] = [
  * reels, per the brief's "show 3 or 4". All six are listed, so swapping one in
  * is a matter of moving it above the line rather than hunting for an id.
  *
- * The four chosen cover four different questions. Sam Serio and Stephon
- * Fauntroy sit below the line because their hooks say nearly the same thing
- * as each other, "will ruin your floor" and "could fail because of this", and
- * running both spends two of four slots on one idea.
+ * Stephon Fauntroy sits last because his hook, "could fail because of this",
+ * says nearly the same thing as Sam Serio's "will ruin your epoxy floor", and
+ * running both would spend two of four slots on one idea.
  */
 export const featuredReels: FeaturedReel[] = [
   {
@@ -167,20 +157,15 @@ export const featuredReels: FeaturedReel[] = [
     hook: 'Epoxy vs polished concrete? Save 3 days of research in 30 seconds.',
     approved: true,
   },
-  {
-    guestSlug: 'sez',
-    reelId: 'DegaBUDtitE',
-    hook: "Customer says they're getting other quotes. Now what?",
-    approved: true,
-  },
 
-  // Below the line. Approved, ready, and not currently rendered.
   {
     guestSlug: 'sam-serio',
     reelId: 'DeJ8V_sNEcQ',
     hook: 'Forgetting THIS will completely ruin your epoxy floor',
     approved: true,
   },
+
+  // Below the line. Approved, ready, and not currently rendered.
   {
     guestSlug: 'lone-wolf-coatings',
     reelId: 'DehDbVENdlE',

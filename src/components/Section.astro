@@ -10,7 +10,7 @@ type Props = {
 const { id, heading, eyebrow, intro, class: className = '' } = Astro.props;
 ---
 
-<section id={id} class:list={['wrap py-16 sm:py-24', className]}>
+<section id={id} class:list={['wrap py-section', className]}>
   <div class="reveal">
     <div class="rule"></div>
     {eyebrow && <p class="eyebrow mt-5">{eyebrow}</p>}
@@ -24,7 +24,7 @@ const { id, heading, eyebrow, intro, class: className = '' } = Astro.props;
     }
   </div>
 
-  <div class="mt-10 sm:mt-12">
+  <div class="mt-8">
     <slot />
   </div>
 </section>
