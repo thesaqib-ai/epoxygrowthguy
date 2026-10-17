@@ -1,5 +1,7 @@
 ---
+import { Image } from 'astro:assets';
 import { site, instagramUrl } from '../config';
+import reelWall from '../assets/hero/reel-wall.png';
 ---
 
 <section class="relative overflow-hidden">
@@ -23,48 +25,77 @@ import { site, instagramUrl } from '../config';
   </div>
 
   <div class="wrap py-section">
-    <div class="reveal max-w-3xl">
-      <p class="eyebrow">{site.seriesName}</p>
+    <div class="grid gap-10 lg:grid-cols-[1fr_380px] lg:items-center lg:gap-14">
+      <div class="reveal">
+        <p class="eyebrow">{site.seriesName}</p>
 
-      <!--
-        The kit's core move: white headline, one red keyword. The copy is
-        unchanged from the brief, the colour just lands on the two words the
-        whole series is about.
-      -->
-      <h1 class="mt-5 text-[2.75rem] leading-[0.95] sm:text-6xl lg:text-7xl">
-        Conversations with the people building the <span class="keyword"
-          >epoxy industry</span
-        >.
-      </h1>
+        <!--
+          The kit's core move: white headline, one red keyword. The copy is
+          unchanged from the brief, the colour just lands on the two words the
+          whole series is about.
 
-      <p class="mt-6 max-w-2xl text-lg leading-relaxed text-muted sm:text-xl">
-        Short, honest interviews with installers, artists, suppliers and
-        educators across the US, Canada, the UK and Australia.
-      </p>
+          Capped at 6xl rather than 7xl now the collage shares the row, so the
+          headline does not wrap to five lines in a narrower column.
+        -->
+        <h1 class="mt-5 text-[2.75rem] leading-[0.95] sm:text-6xl">
+          Conversations with the people building the <span class="keyword"
+            >epoxy industry</span
+          >.
+        </h1>
 
-      <div class="mt-9 flex flex-wrap items-center gap-3">
-        <a href="#request" class="btn btn-primary">Request an interview</a>
-        <a
-          href={instagramUrl}
-          target="_blank"
-          rel="noopener"
-          class="btn btn-ghost"
-        >
-          Watch the interviews
-        </a>
+        <p class="mt-6 max-w-2xl text-lg leading-relaxed text-muted sm:text-xl">
+          Short, honest interviews with installers, artists, suppliers and
+          educators across the US, Canada, the UK and Australia.
+        </p>
+
+        <div class="mt-9 flex flex-wrap items-center gap-3">
+          <a href="#request" class="btn btn-primary">Request an interview</a>
+          <a
+            href={instagramUrl}
+            target="_blank"
+            rel="noopener"
+            class="btn btn-ghost"
+          >
+            Watch the interviews
+          </a>
+        </div>
+
+        <p class="mt-6 text-sm text-faint">
+          Hosted by {site.hostName} <span class="px-1">·</span>
+          <a
+            href={instagramUrl}
+            target="_blank"
+            rel="noopener"
+            class="text-muted underline decoration-ink-600 underline-offset-4 transition-colors hover:text-accent"
+          >
+            @{site.instagramHandle}
+          </a>
+        </p>
       </div>
 
-      <p class="mt-6 text-sm text-faint">
-        Hosted by {site.hostName} <span class="px-1">·</span>
-        <a
-          href={instagramUrl}
-          target="_blank"
-          rel="noopener"
-          class="text-muted underline decoration-ink-600 underline-offset-4 transition-colors hover:text-accent"
-        >
-          @{site.instagramHandle}
-        </a>
-      </p>
+      <!--
+        Shown on phones too, not hidden with `lg:block`. A display:none image
+        is still downloaded by most browsers, so hiding it would cost the
+        mobile visitor the bytes and give them nothing. It is real proof that
+        the series exists, so it earns its place on every screen.
+      -->
+      <div class="reveal" style="--reveal-delay: 120ms">
+        <Image
+          src={reelWall}
+          alt="Six recent interviews from the series, as Instagram reel thumbnails"
+          widths={[380, 760]}
+          sizes="(min-width: 1024px) 380px, 100vw"
+          {/*
+            Lazy, not eager. On desktop it sits in the first viewport, so the
+            browser fetches it straight away regardless. On a phone it is below
+            the fold, and eager would have it competing with the webfonts on a
+            4G connection for something nobody has scrolled to yet.
+          */}
+          loading="lazy"
+          decoding="async"
+          class="mx-auto w-full max-w-md lg:max-w-none"
+        />
+      </div>
     </div>
   </div>
 </section>
