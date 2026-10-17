@@ -8,21 +8,21 @@ import { site } from '../config';
   >
     <h2 class="text-sm font-semibold normal-case tracking-normal text-muted"
       style="font-family: var(--font-sans)">
-      Outside the interviews
+      Outside the interviews, here is what I do
     </h2>
+    <!--
+      Says what the thing is and stops. No benefits stacked up, no "see how it
+      works", no arrow pushing you onward. The link is just the address, so
+      anyone curious can go and nobody feels sold to.
+    -->
     <p class="mt-3 text-sm leading-relaxed text-faint sm:text-base">
-      I also build AI phone systems for coating companies. They answer the calls
-      you miss while you're on a job, qualify the homeowner and book the
-      estimate into your calendar.
+      I build AI phone systems for coating companies, at <a
+        href={site.autosinqUrl}
+        target="_blank"
+        rel="noopener"
+        class="text-accent-bright underline decoration-accent/30 underline-offset-4 transition-colors hover:decoration-accent"
+        >autosinq.com</a
+      >.
     </p>
-    <a
-      href={site.autosinqUrl}
-      target="_blank"
-      rel="noopener"
-      class="mt-4 inline-flex items-center gap-1.5 text-sm font-medium text-accent-bright underline decoration-accent/30 underline-offset-4 transition-colors hover:decoration-accent"
-    >
-      See how it works at autosinq.com
-      <span aria-hidden="true">&rarr;</span>
-    </a>
   </div>
 </section>

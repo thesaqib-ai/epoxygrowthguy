@@ -43,8 +43,8 @@ email. The Supabase row id is at the bottom.
 > Thanks for reaching out about the Epoxy Growth Sessions. I've got your
 > details and I'll look through them in the next 48 hours.
 >
-> If it's a fit, I'll contact you to arrange a time. The call is relaxed and
-> takes about 15 to 20 minutes.
+> If it's a fit, I'll contact you to arrange a time. The call takes about 15 to
+> 20 minutes.
 >
 > Talk soon,
 > Muhammad Saqib S.
