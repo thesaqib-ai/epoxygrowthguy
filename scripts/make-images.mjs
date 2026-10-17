@@ -17,10 +17,11 @@ const root = path.resolve(import.meta.dirname, '..');
 const publicDir = path.join(root, 'public');
 const guestsDir = path.join(root, 'src', 'assets', 'guests');
 
-const GOLD = '#D4A84B';
+// Resin Noir. See src/assets/brand kit/ and the tokens in global.css.
+const RED = '#FF0033';
 const INK = '#0B0B0C';
-const PAPER = '#F6F4F0';
-const MUTED = '#A9A6A0';
+const PAPER = '#F5F5F0';
+const MUTED = '#A8A8A4';
 
 const DISPLAY = 'Anton, Impact, Haettenschweiler, Arial Narrow, sans-serif';
 const SANS = 'Segoe UI, Inter, Helvetica Neue, Arial, sans-serif';
@@ -29,9 +30,10 @@ await mkdir(publicDir, { recursive: true });
 
 /* ---------- apple touch icon ---------- */
 
+// Matches public/favicon.svg: red field, Concrete White mark.
 const iconSvg = `<svg xmlns="http://www.w3.org/2000/svg" width="180" height="180" viewBox="0 0 64 64">
-  <rect width="64" height="64" fill="${INK}"/>
-  <path d="M20 16h25v8H29v6h14v8H29v6h16v8H20z" fill="${GOLD}"/>
+  <rect width="64" height="64" fill="${RED}"/>
+  <path d="M20 16h25v8H29v6h14v8H29v6h16v8H20z" fill="${PAPER}"/>
 </svg>`;
 
 await sharp(Buffer.from(iconSvg)).png().toFile(
@@ -55,30 +57,25 @@ if (process.env.FACES === '1') {
 const ogSvg = `<svg xmlns="http://www.w3.org/2000/svg" width="${W}" height="${H}">
   <defs>
     <radialGradient id="glow" cx="12%" cy="0%" r="70%">
-      <stop offset="0%" stop-color="${GOLD}" stop-opacity="0.26"/>
-      <stop offset="100%" stop-color="${GOLD}" stop-opacity="0"/>
-    </radialGradient>
-    <radialGradient id="cool" cx="95%" cy="85%" r="60%">
-      <stop offset="0%" stop-color="#7A6A9A" stop-opacity="0.22"/>
-      <stop offset="100%" stop-color="#7A6A9A" stop-opacity="0"/>
+      <stop offset="0%" stop-color="${RED}" stop-opacity="0.26"/>
+      <stop offset="100%" stop-color="${RED}" stop-opacity="0"/>
     </radialGradient>
   </defs>
 
   <rect width="${W}" height="${H}" fill="${INK}"/>
   <rect width="${W}" height="${H}" fill="url(#glow)"/>
-  <rect width="${W}" height="${H}" fill="url(#cool)"/>
 
   <text x="80" y="128" font-family="${SANS}" font-size="24" font-weight="700"
-        letter-spacing="5.5" fill="${GOLD}">THE EPOXY GROWTH SESSIONS</text>
+        letter-spacing="5.5" fill="${RED}">THE EPOXY GROWTH SESSIONS</text>
 
   <text x="80" y="250" font-family="${DISPLAY}" font-size="78" fill="${PAPER}"
         letter-spacing="0.5">CONVERSATIONS WITH THE</text>
   <text x="80" y="330" font-family="${DISPLAY}" font-size="78" fill="${PAPER}"
         letter-spacing="0.5">PEOPLE BUILDING THE</text>
-  <text x="80" y="410" font-family="${DISPLAY}" font-size="78" fill="${GOLD}"
+  <text x="80" y="410" font-family="${DISPLAY}" font-size="78" fill="${RED}"
         letter-spacing="0.5">EPOXY INDUSTRY.</text>
 
-  <rect x="80" y="480" width="56" height="3" fill="${GOLD}"/>
+  <rect x="80" y="480" width="56" height="3" fill="${RED}"/>
 
   <text x="80" y="546" font-family="${SANS}" font-size="27" fill="${MUTED}">
     Hosted by Muhammad Saqib S.  ·  @epoxy_growth_guy
@@ -94,7 +91,8 @@ if (faces.length >= 4) {
   const gap = 16;
   const totalWidth = faces.length * size + (faces.length - 1) * gap;
   let left = W - 80 - totalWidth;
-  const top = 460;
+  // Clear of the byline baseline at y=546, which the faces used to sit on.
+  const top = 414;
 
   const mask = Buffer.from(
     `<svg width="${size}" height="${size}"><circle cx="${size / 2}" cy="${size / 2}" r="${size / 2}" fill="#fff"/></svg>`,

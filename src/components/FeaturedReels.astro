@@ -37,7 +37,7 @@ const cards = await Promise.all(
             class="reveal group block"
             style={`--reveal-delay: ${i * 60}ms`}
           >
-            <div class="relative aspect-[9/16] overflow-hidden rounded-2xl border border-white/5 bg-ink-900">
+            <div class="relative aspect-[9/16] overflow-hidden rounded-[20px] border border-white/[0.06] bg-ink-850">
               {image ? (
                 <Image
                   src={image}
@@ -64,7 +64,7 @@ const cards = await Promise.all(
               />
 
               <span
-                class="absolute left-1/2 top-1/2 flex h-12 w-12 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full bg-ink-950/60 ring-1 ring-white/20 backdrop-blur-sm transition-colors group-hover:bg-gold-400"
+                class="absolute left-1/2 top-1/2 flex h-12 w-12 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full bg-ink-950/60 ring-1 ring-white/20 backdrop-blur-sm transition-colors group-hover:bg-accent"
                 aria-hidden="true"
               >
                 <svg

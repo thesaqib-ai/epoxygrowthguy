@@ -43,7 +43,7 @@ const initials = label
 ---
 
 <article
-  class="reveal group flex flex-col items-center rounded-2xl border border-white/5 bg-ink-900/60 px-4 py-6 text-center transition-colors hover:border-gold-400/30"
+  class="reveal group flex flex-col items-center rounded-[20px] border border-white/[0.06] bg-ink-850 px-4 py-6 text-center transition-colors hover:border-accent/40"
   style={`--reveal-delay: ${Math.min(index, 11) * 60}ms`}
 >
   {
@@ -61,7 +61,7 @@ const initials = label
       />
     ) : (
       <div
-        class="flex h-20 w-20 items-center justify-center rounded-full bg-ink-800 font-display text-xl text-gold-400 ring-1 ring-white/10 sm:h-24 sm:w-24 sm:text-2xl"
+        class="flex h-20 w-20 items-center justify-center rounded-full bg-ink-800 font-display text-xl text-paper ring-1 ring-white/10 sm:h-24 sm:w-24 sm:text-2xl"
         aria-hidden="true"
       >
         {initials}
@@ -91,7 +91,7 @@ const initials = label
         href={instagramProfileUrl(guest.instagram)}
         target="_blank"
         rel="noopener"
-        class="mt-3 text-xs text-faint underline decoration-ink-700 underline-offset-4 transition-colors hover:text-gold-400"
+        class="mt-3 text-xs text-faint underline decoration-ink-700 underline-offset-4 transition-colors hover:text-accent-bright"
       >
         @{guest.instagram}
       </a>

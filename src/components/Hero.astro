@@ -6,14 +6,13 @@ import { site, instagramUrl } from '../config';
   <!-- Faint metallic swirl behind the hero. Pure CSS, so there is no extra
        request, and it sits far below text contrast. -->
   <div class="pointer-events-none absolute inset-0 -z-10" aria-hidden="true">
+    <!--
+      One red glow, not two colours. The kit's "never 3+ colours" rule applies
+      to the backdrop as much as the type, so the old purple is gone.
+    -->
     <div
-      class="absolute -left-1/4 -top-1/3 h-[42rem] w-[42rem] rounded-full opacity-[0.16] blur-3xl"
-      style="background: radial-gradient(closest-side, #D4A84B, transparent 70%)"
-    >
-    </div>
-    <div
-      class="absolute -right-1/4 top-1/4 h-[34rem] w-[34rem] rounded-full opacity-[0.10] blur-3xl"
-      style="background: radial-gradient(closest-side, #7a6a9a, transparent 70%)"
+      class="absolute -right-1/4 -top-1/3 h-[46rem] w-[46rem] rounded-full opacity-[0.13] blur-3xl"
+      style="background: radial-gradient(closest-side, #FF0033, transparent 70%)"
     >
     </div>
     <div
@@ -27,10 +26,15 @@ import { site, instagramUrl } from '../config';
     <div class="reveal max-w-3xl">
       <p class="eyebrow">{site.seriesName}</p>
 
-      <h1
-        class="mt-5 text-[2.75rem] leading-[0.95] sm:text-6xl lg:text-7xl"
-      >
-        Conversations with the people building the epoxy industry.
+      <!--
+        The kit's core move: white headline, one red keyword. The copy is
+        unchanged from the brief, the colour just lands on the two words the
+        whole series is about.
+      -->
+      <h1 class="mt-5 text-[2.75rem] leading-[0.95] sm:text-6xl lg:text-7xl">
+        Conversations with the people building the <span class="keyword"
+          >epoxy industry</span
+        >.
       </h1>
 
       <p class="mt-6 max-w-2xl text-lg leading-relaxed text-muted sm:text-xl">
@@ -56,7 +60,7 @@ import { site, instagramUrl } from '../config';
           href={instagramUrl}
           target="_blank"
           rel="noopener"
-          class="text-muted underline decoration-ink-600 underline-offset-4 transition-colors hover:text-gold-400"
+          class="text-muted underline decoration-ink-600 underline-offset-4 transition-colors hover:text-accent"
         >
           @{site.instagramHandle}
         </a>

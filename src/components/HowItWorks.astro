@@ -22,10 +22,10 @@ const steps = [
     {
       steps.map((step, i) => (
         <li
-          class="reveal rounded-2xl border border-white/5 bg-ink-900/50 p-5 sm:p-6"
+          class="reveal rounded-[20px] border border-white/[0.06] bg-ink-850 p-5 sm:p-6"
           style={`--reveal-delay: ${i * 60}ms`}
         >
-          <span class="font-display text-2xl text-gold-400">
+          <span class="font-display text-2xl text-accent">
             {String(i + 1).padStart(2, '0')}
           </span>
           <h3 class="mt-3 text-base normal-case tracking-normal sm:text-lg">

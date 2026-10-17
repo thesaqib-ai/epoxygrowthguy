@@ -14,10 +14,12 @@ import { site, instagramUrl } from '../config';
 const turnstileSiteKey =
   import.meta.env.PUBLIC_TURNSTILE_SITE_KEY || site.turnstileSiteKey;
 
+// Red on focus, because the kit names forms as one of its red surfaces.
 const fieldClass =
-  'mt-2 w-full rounded-xl border border-ink-700 bg-ink-900 px-4 py-3 text-base text-paper placeholder:text-faint transition-colors focus:border-gold-400 focus:outline-none focus:ring-1 focus:ring-gold-400 aria-[invalid=true]:border-red-400/70';
-const labelClass = 'block text-sm font-medium text-paper';
-const errorClass = 'mt-1.5 hidden text-sm text-red-300';
+  'mt-2 w-full rounded-xl border border-ink-700 bg-ink-950 px-4 py-3 text-base text-paper placeholder:text-faint transition-colors focus:border-accent focus:outline-none focus:ring-1 focus:ring-accent aria-[invalid=true]:border-warn/70';
+const labelClass = 'block text-sm font-bold text-paper';
+// The softer red, so "this is wrong" never looks like "this is selected".
+const errorClass = 'mt-1.5 hidden text-sm text-warn';
 ---
 
 <section id="request" class="wrap scroll-mt-20 py-16 sm:py-24">
@@ -30,19 +32,19 @@ const errorClass = 'mt-1.5 hidden text-sm text-red-300';
   </div>
 
   <div
-    class="reveal mt-10 rounded-3xl border border-white/5 bg-ink-900/40 p-5 sm:mt-12 sm:p-8"
+    class="reveal mt-10 rounded-[20px] border border-white/[0.06] bg-ink-850 p-5 sm:mt-12 sm:p-8"
   >
     <noscript>
       <p class="text-base leading-relaxed text-muted">
         This form needs JavaScript. Send me a DM on Instagram at
         <a
           href={instagramUrl}
-          class="text-gold-400 underline underline-offset-4"
+          class="text-accent-bright underline underline-offset-4"
           >@{site.instagramHandle}</a
         > and tell me about your business, or email
         <a
           href={`mailto:${site.contactEmail}`}
-          class="text-gold-400 underline underline-offset-4"
+          class="text-accent-bright underline underline-offset-4"
           >{site.contactEmail}</a
         >.
       </p>
@@ -50,13 +52,19 @@ const errorClass = 'mt-1.5 hidden text-sm text-red-300';
 
     <!-- Success state. Replaces the form, no page reload. -->
     <div id="form-success" class="hidden" role="status" aria-live="polite">
+      <!--
+        Deliberately NOT the brand red. Red is the kit's payoff colour, but a
+        red disc with a tick in it reads as an error for the first half second,
+        and this is the one moment on the page where nobody should feel that.
+        White keeps it calm and still spends no third colour.
+      -->
       <div
-        class="flex h-12 w-12 items-center justify-center rounded-full bg-gold-400/15 ring-1 ring-gold-400/30"
+        class="flex h-12 w-12 items-center justify-center rounded-full bg-white/10 ring-1 ring-white/20"
         aria-hidden="true"
       >
         <svg
           viewBox="0 0 24 24"
-          class="h-6 w-6 stroke-gold-400"
+          class="h-6 w-6 stroke-paper"
           fill="none"
           stroke-width="2"
           stroke-linecap="round"
@@ -259,7 +267,7 @@ const errorClass = 'mt-1.5 hidden text-sm text-red-300';
             {
               SERVICES.map((option, i) => (
                 <label
-                  class="cursor-pointer select-none rounded-full border border-ink-700 bg-ink-900 px-4 py-2 text-sm text-muted transition-colors hover:border-ink-600 has-checked:border-gold-400 has-checked:bg-gold-400 has-checked:text-ink-950 has-checked:font-semibold has-focus-visible:outline has-focus-visible:outline-2 has-focus-visible:outline-offset-2 has-focus-visible:outline-gold-300"
+                  class="cursor-pointer select-none rounded-full border border-ink-700 bg-ink-950 px-4 py-2 text-sm text-muted transition-colors hover:border-ink-600 has-checked:border-accent has-checked:bg-accent/20 has-checked:text-paper has-checked:font-bold has-focus-visible:outline has-focus-visible:outline-2 has-focus-visible:outline-offset-2 has-focus-visible:outline-accent"
                   for={`service-${i}`}
                 >
                   <input
