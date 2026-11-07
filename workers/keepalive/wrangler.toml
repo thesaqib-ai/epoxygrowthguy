@@ -1,0 +1,8 @@
+name = "epoxygrowthguy-keepalive"
+main = "index.js"
+compatibility_date = "2026-10-01"
+# Runs on its schedule only, with no public address.
+workers_dev = false
+
+[triggers]
+crons = ["17 6 * * *"]

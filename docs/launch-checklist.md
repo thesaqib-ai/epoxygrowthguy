@@ -329,10 +329,27 @@ is not on the widget's allowed list, which is the fix above. If the console is
 clean but the widget is missing, view source and search for `cf-turnstile`. If
 that is absent the site key is not in `src/config.ts`.
 
+**An email arrives with a subject starting "NOT SAVED".**
+The save to Supabase failed, so that email is the only copy of the request.
+Keep it. The guest saw the normal success message and got their "got it"
+email, so just reply as usual. Then open <https://supabase.com/dashboard/projects>
+and check the project is running. If it says Paused, click it and click
+**Restore project**. Check <https://epoxygrowthguy.com/api/health> afterwards:
+it should show `{"ok":true}`.
+
 **The form says "Something went wrong sending that."**
-Supabase rejected the insert. Pages project > **Functions** > **Logs**, submit
-again, and read the error. Most likely the service role key is wrong, or the
-SQL in step A never ran.
+Both the save and the rescue email failed, so nothing was kept. Pages project >
+**Functions** > **Logs**, submit again, and read the error. `error code: 1016`
+means the Supabase address does not resolve, so the project is paused or
+`SUPABASE_URL` is wrong. Otherwise the service role key is likely wrong, or the
+SQL in step A never ran. The Resend advice below covers the email half.
+
+**The Supabase project keeps pausing.**
+The `epoxygrowthguy-keepalive` Worker in `workers/keepalive` calls
+`/api/health` every day so this should not happen. Check it still exists under
+**Workers & Pages** in Cloudflare, and that its **Settings** > **Trigger
+Events** still lists the daily schedule. To redeploy it, run
+`npx wrangler deploy` from that folder.
 
 **The row saves but no email arrives.**
 Sending is not working but the site is fine, which is exactly how it was

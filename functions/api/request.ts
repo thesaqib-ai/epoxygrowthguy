@@ -4,18 +4,24 @@
  * 1. Verify the Turnstile token
  * 2. Honeypot filled, return 200 and do nothing else
  * 3. Validate and clean every field again, server side
- * 4. Rate limit to 3 requests per IP per hour
+ * 4. Check the rate limit of 3 accepted requests per IP per hour
  * 5. Save to Supabase (or Airtable)
  * 6. Email Saqib, and send the person a short "got it", after the response
  * 7. Return { ok: true }
  *
  * If the email step fails the row is still saved and the person still sees
  * success. The failure is logged.
+ *
+ * If the save fails, the whole request is emailed to Saqib instead, and the
+ * person only sees success once that email has been accepted. They see the
+ * error only when both copies failed, because then nothing of theirs exists.
  */
 import { validateRequest, HONEYPOT_FIELD } from '../../src/lib/form-schema';
 import { saveRequest, type StoreEnv } from '../../src/lib/store';
 import {
   sendNotifications,
+  sendRescue,
+  sendAutoReply,
   type MailEnv,
   type BotCheck,
 } from '../../src/lib/notify';
@@ -67,18 +73,30 @@ async function verifyTurnstile(
 /**
  * Simple fixed window counter in KV. Good enough for a contact form, and it
  * costs nothing when nobody is submitting.
+ *
+ * Checking and counting are separate on purpose. Only a request that was
+ * actually kept is counted, so someone retrying through an outage of ours is
+ * never locked out by our own failure.
  */
+const rateLimitKey = (ip: string): string =>
+  `rl:${ip}:${Math.floor(Date.now() / 1000 / RATE_LIMIT_WINDOW_SECONDS)}`;
+
 async function overRateLimit(kv: KVNamespace, ip: string): Promise<boolean> {
-  const bucket = Math.floor(Date.now() / 1000 / RATE_LIMIT_WINDOW_SECONDS);
-  const key = `rl:${ip}:${bucket}`;
-  const current = Number((await kv.get(key)) ?? '0');
+  const current = Number((await kv.get(rateLimitKey(ip))) ?? '0');
+  return current >= RATE_LIMIT_MAX;
+}
 
-  if (current >= RATE_LIMIT_MAX) return true;
-
-  await kv.put(key, String(current + 1), {
-    expirationTtl: RATE_LIMIT_WINDOW_SECONDS + 60,
-  });
-  return false;
+/** Runs after the response, so it must never throw. */
+async function countRequest(kv: KVNamespace, ip: string): Promise<void> {
+  try {
+    const key = rateLimitKey(ip);
+    const current = Number((await kv.get(key)) ?? '0');
+    await kv.put(key, String(current + 1), {
+      expirationTtl: RATE_LIMIT_WINDOW_SECONDS + 60,
+    });
+  } catch (error) {
+    console.error('Rate limit count failed', error);
+  }
 }
 
 export const onRequestPost: PagesFunction<Env> = async (context) => {
@@ -174,18 +192,29 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
     }
   }
 
-  // 5. Save it.
+  // 5. Save it. If storage is down, the rescue email becomes the only copy,
+  // so wait for it here: success must not be shown until it has been accepted.
   let recordId: string | null = null;
+  let saved = false;
   try {
-    const saved = await saveRequest(data, env);
-    recordId = saved.id;
+    recordId = (await saveRequest(data, env)).id;
+    saved = true;
   } catch (error) {
     console.error('Saving the request failed', error);
-    return json({ ok: false, message: GENERIC_ERROR }, 500);
+    if (!(await sendRescue(data, env, botCheck))) {
+      console.error('Rescue email failed too, this request was not kept.');
+      return json({ ok: false, message: GENERIC_ERROR }, 500);
+    }
   }
 
+  if (env.RATE_LIMIT && ip) waitUntil(countRequest(env.RATE_LIMIT, ip));
+
   // 6. Send the emails without making the person wait for them.
-  waitUntil(sendNotifications(data, env, recordId, botCheck));
+  waitUntil(
+    saved
+      ? sendNotifications(data, env, recordId, botCheck)
+      : sendAutoReply(data, env),
+  );
 
   // 7. Done.
   return json({ ok: true });

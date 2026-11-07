@@ -20,6 +20,9 @@
  * browser. Nothing here is allowed to throw. Every failure becomes a
  * console.error and a `false`. A missed notification is an annoyance that
  * Supabase still has a record of; a 500 on the form is a lost guest.
+ *
+ * The one exception to "the row is already saved" is sendRescue. When the save
+ * itself fails it carries the whole request, and the caller waits for it.
  */
 import type { RequestPayload } from './form-schema';
 import { site } from '../config';
@@ -51,6 +54,9 @@ const BOT_CHECK_NOTE: Record<Exclude<BotCheck, 'verified'>, string> = {
   skipped:
     'Heads up: no bot check was configured when this arrived.',
 };
+
+const NOT_SAVED_NOTE =
+  'This request could not be saved to the database, so this email is the only copy. Keep it. Check that the Supabase project is running.';
 
 /** Escapes anything a stranger typed before it goes near an HTML body. */
 const esc = (value: string): string =>
@@ -155,11 +161,13 @@ async function notifyOwner(
   to: string,
   recordId: string | null,
   botCheck: BotCheck,
+  saved = true,
 ): Promise<boolean> {
   const rows = fields(data);
   // Only say anything when it is not the ordinary case, so a normal request
   // stays a clean read.
   const note = botCheck === 'verified' ? '' : BOT_CHECK_NOTE[botCheck];
+  const notes = [...(saved ? [] : [NOT_SAVED_NOTE]), ...(note ? [note] : [])];
 
   const text = [
     'New interview request.',
@@ -167,13 +175,18 @@ async function notifyOwner(
     ...rows.map(([label, value]) => `${label}: ${value}`),
     '',
     ...(recordId ? [`Row: ${recordId}`, ''] : []),
-    ...(note ? [note, ''] : []),
+    ...notes.flatMap((line) => [line, '']),
     'Reply to this email to answer them directly.',
   ].join('\n');
 
   const html = `<div style="font:15px/1.6 -apple-system,Segoe UI,Roboto,sans-serif">
 <p style="margin:0 0 16px"><strong>New interview request.</strong></p>
-${note ? `<p style="margin:0 0 16px;padding:10px 12px;background:#fff1f3;border-left:3px solid #ff0033;color:#8a1026;font-size:14px">${esc(note)}</p>` : ''}
+${notes
+  .map(
+    (line) =>
+      `<p style="margin:0 0 16px;padding:10px 12px;background:#fff1f3;border-left:3px solid #ff0033;color:#8a1026;font-size:14px">${esc(line)}</p>`,
+  )
+  .join('\n')}
 <table cellpadding="6" style="border-collapse:collapse">
 ${rows
   .map(
@@ -189,7 +202,7 @@ ${recordId ? `<p style="margin:16px 0 0;color:#888;font-size:13px">Row ${esc(rec
   return deliver(apiKey, 'interview request notification', {
     to,
     reply_to: data.email,
-    subject: `Interview request: ${data.full_name}, ${data.business_name}`,
+    subject: `${saved ? '' : 'NOT SAVED, '}Interview request: ${data.full_name}, ${data.business_name}`,
     text,
     html,
   });
@@ -246,4 +259,32 @@ export async function sendNotifications(
     ),
     autoReply(env.RESEND_API_KEY, data),
   ]);
+}
+
+/**
+ * The save failed, so this email is the only copy of the request. Resolves
+ * true only once Resend has accepted it, which is what the caller's decision
+ * to show success rests on.
+ */
+export async function sendRescue(
+  data: RequestPayload,
+  env: MailEnv,
+  botCheck: BotCheck = 'skipped',
+): Promise<boolean> {
+  return notifyOwner(
+    env.RESEND_API_KEY,
+    data,
+    env.NOTIFY_EMAIL || site.contactEmail,
+    null,
+    botCheck,
+    false,
+  );
+}
+
+/** The "got it" on its own, for when sendRescue already told Saqib. */
+export async function sendAutoReply(
+  data: RequestPayload,
+  env: MailEnv,
+): Promise<void> {
+  await autoReply(env.RESEND_API_KEY, data);
 }

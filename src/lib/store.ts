@@ -139,6 +139,31 @@ async function saveToAirtable(
   return { id: body?.id ?? null };
 }
 
+/**
+ * A small real query, for /api/health. Free Supabase projects pause after
+ * about a week without activity, and a paused project takes the form down
+ * with it, so this runs daily. Airtable has nothing to keep awake.
+ */
+export async function pingStore(env: StoreEnv): Promise<void> {
+  if (env.STORE_TARGET === 'airtable') return;
+
+  const url = env.SUPABASE_URL?.replace(/\/+$/, '');
+  const key = env.SUPABASE_SERVICE_ROLE_KEY;
+  if (!url || !key) throw new Error('Supabase is not configured.');
+
+  const res = await fetch(
+    `${url}/rest/v1/interview_requests?select=id&limit=1`,
+    {
+      headers: { apikey: key, authorization: `Bearer ${key}` },
+      signal: AbortSignal.timeout(10000),
+    },
+  );
+  if (!res.ok) {
+    const detail = await res.text().catch(() => '');
+    throw new Error(`Supabase ping failed (${res.status}): ${detail}`);
+  }
+}
+
 export async function saveRequest(
   data: RequestPayload,
   env: StoreEnv,
